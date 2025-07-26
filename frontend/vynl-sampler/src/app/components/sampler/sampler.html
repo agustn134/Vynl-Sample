@@ -1,0 +1,94 @@
+<div class="min-h-screen bg-vynl-black text-white p-6">
+  <!-- Header VYNL Style -->
+  <div class="bg-vynl-dark p-6 rounded-lg border border-vynl-gray mb-6">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <h1 class="text-3xl font-bold text-vynl-purple font-mono">VYNL</h1>
+        <span class="text-vynl-gray-light text-sm">Sample the Underground</span>
+      </div>
+      
+      <div class="flex items-center space-x-6">
+        <button 
+          (click)="togglePlay()" 
+          [class]="isPlaying() ? 'bg-red-600 hover:bg-red-700' : 'bg-vynl-purple hover:bg-vynl-purple-dark'"
+          class="px-6 py-3 rounded-lg font-bold transition-all duration-200 shadow-lg">
+          {{ isPlaying() ? 'STOP' : 'PLAY' }}
+        </button>
+        
+        <div class="text-center">
+          <div class="text-vynl-purple text-sm">BPM</div>
+          <div class="text-2xl font-bold">{{ bpm() }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pad Grid -->
+  <div class="bg-vynl-dark p-6 rounded-lg border border-vynl-gray">
+    <h2 class="text-vynl-purple text-xl font-bold mb-4">SAMPLER PADS</h2>
+    
+    <div class="grid grid-cols-4 gap-4 max-w-2xl">
+      @for (pad of pads(); track pad.id) {
+        <div class="relative">
+          <button 
+            (mousedown)="playPad(pad.id)"
+            (touchstart)="playPad(pad.id)"
+            [class]="getPadClass(pad)"
+            class="relative overflow-hidden">
+            
+            <!-- LED Indicator -->
+            <div class="absolute top-2 right-2 w-3 h-3 rounded-full"
+                 [class]="pad.isActive ? 'bg-vynl-purple animate-pulse-fast' : 'bg-vynl-gray'">
+            </div>
+            
+            <!-- Pad Number -->
+            <div class="absolute top-2 left-2 text-xs font-mono text-vynl-gray-light">
+              {{ pad.id + 1 }}
+            </div>
+            
+            <!-- Sample Name -->
+            <div class="text-center mt-4">
+              <div class="text-xs truncate px-2">
+                {{ pad.sampleName }}
+              </div>
+            </div>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Controls Section -->
+  <div class="mt-6 grid grid-cols-2 gap-6">
+    <!-- Download Section -->
+    <div class="bg-vynl-dark p-6 rounded-lg border border-vynl-gray">
+      <h3 class="text-vynl-purple text-lg font-bold mb-4">DOWNLOAD AUDIO</h3>
+      <div class="space-y-4">
+        <input 
+          type="text"
+          placeholder="YouTube URL"
+          class="w-full p-3 bg-vynl-black border border-vynl-gray rounded-lg text-white placeholder-vynl-gray-light focus:border-vynl-purple focus:outline-none">
+        
+        <button class="w-full bg-vynl-purple hover:bg-vynl-purple-dark p-3 rounded-lg font-bold transition-all duration-200">
+          DOWNLOAD & SAMPLE
+        </button>
+      </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="bg-vynl-dark p-6 rounded-lg border border-vynl-gray">
+      <h3 class="text-vynl-purple text-lg font-bold mb-4">UPLOAD SAMPLES</h3>
+      <div class="space-y-4">
+        <input 
+          type="file" 
+          multiple
+          accept="audio/*"
+          class="w-full p-3 bg-vynl-black border border-vynl-gray rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-vynl-purple file:text-white">
+        
+        <div class="text-xs text-vynl-gray-light">
+          Upload your drum packs (.wav, .mp3, .aiff)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
