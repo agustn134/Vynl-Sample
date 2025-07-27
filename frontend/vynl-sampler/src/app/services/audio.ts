@@ -26,10 +26,10 @@ export class AudioService {
     try {
       // Inicializar el contexto de audio
       await Tone.start();
-      
+
       // Configurar el transporte
       Tone.Transport.bpm.value = 120;
-      
+
       console.log('🎵 VYNL Audio Engine initialized');
       this.isInitialized = true;
     } catch (error) {
@@ -54,14 +54,14 @@ export class AudioService {
     }
 
     const playerData = this.players[padIndex];
-    
+
     if (playerData && playerData.isLoaded && playerData.player.loaded) {
       try {
         // Detener si ya está reproduciendo
         if (playerData.player.state === 'started') {
           playerData.player.stop();
         }
-        
+
         // Reproducir el sample
         playerData.player.start();
         console.log(`🔊 Playing pad ${padIndex + 1}`);
@@ -80,12 +80,12 @@ export class AudioService {
 
     try {
       const playerData = this.players[padIndex];
-      
+
       // Cargar el audio en el player
       await playerData.player.load(audioUrl);
-      
+
       playerData.isLoaded = true;
-      
+
       console.log(`✅ Sample loaded to pad ${padIndex + 1}`);
       return true;
     } catch (error) {
@@ -93,6 +93,24 @@ export class AudioService {
       return false;
     }
   }
+
+  async loadDemoSamples(): Promise<void> {
+  const demoSamples = [
+    { url: '/src/assets/samples/Cymatics-Kick.wav', name: 'KICK' },
+    { url: '/src/assets/samples/Cymatics-Snare.wav', name: 'SNARE' },
+    { url: '/src/assets/samples/Cymatics-Hihat.wav', name: 'HIHAT' },
+    { url: '/src/assets/samples/Cymatics-OpenHat.wav', name: 'OPEN HAT' }
+  ];
+
+  for (let i = 0; i < demoSamples.length; i++) {
+    try {
+      await this.loadSampleToPad(i, demoSamples[i].url);
+      console.log(`✅ Demo sample ${demoSamples[i].name} loaded to pad ${i + 1}`);
+    } catch (error) {
+      console.log(`⚠️ Could not load demo sample ${demoSamples[i].name}`);
+    }
+  }
+}
 
   async loadSampleFromFile(padIndex: number, file: File): Promise<boolean> {
     if (!this.isInitialized) {
@@ -102,13 +120,13 @@ export class AudioService {
     try {
       // Crear URL del archivo
       const audioUrl = URL.createObjectURL(file);
-      
+
       const success = await this.loadSampleToPad(padIndex, audioUrl);
-      
+
       if (success) {
         console.log(`✅ File "${file.name}" loaded to pad ${padIndex + 1}`);
       }
-      
+
       return success;
     } catch (error) {
       console.error(`Error loading file to pad ${padIndex}:`, error);
@@ -118,19 +136,19 @@ export class AudioService {
 
   clearPad(padIndex: number): void {
     const playerData = this.players[padIndex];
-    
+
     if (playerData) {
       // Detener reproducción
       if (playerData.player.state === 'started') {
         playerData.player.stop();
       }
-      
+
       // Limpiar el player
       playerData.player.dispose();
       playerData.player = new Tone.Player().toDestination();
       playerData.isLoaded = false;
       playerData.buffer = null;
-      
+
       console.log(`🗑️ Pad ${padIndex + 1} cleared`);
     }
   }
@@ -147,7 +165,7 @@ export class AudioService {
       // TODO: Implementar secuenciador
       console.log('🎯 Sequencer will be implemented next');
     }
-    
+
     Tone.Transport.start();
     console.log('▶️ Transport started');
   }
@@ -159,11 +177,11 @@ export class AudioService {
 
   getPadStatus(padIndex: number): { isLoaded: boolean; isPlaying: boolean } {
     const playerData = this.players[padIndex];
-    
+
     if (!playerData) {
       return { isLoaded: false, isPlaying: false };
     }
-    
+
     return {
       isLoaded: playerData.isLoaded,
       isPlaying: playerData.player.state === 'started'
@@ -173,7 +191,7 @@ export class AudioService {
   // Aplicar efectos a un pad específico
   addEffectToPad(padIndex: number, effectType: 'reverb' | 'delay' | 'filter'): void {
     const playerData = this.players[padIndex];
-    
+
     if (!playerData) return;
 
     switch (effectType) {
@@ -181,18 +199,18 @@ export class AudioService {
         const reverb = new Tone.Reverb(2).toDestination();
         playerData.player.connect(reverb);
         break;
-        
+
       case 'delay':
         const delay = new Tone.FeedbackDelay('8n', 0.3).toDestination();
         playerData.player.connect(delay);
         break;
-        
+
       case 'filter':
         const filter = new Tone.Filter(1000, 'lowpass').toDestination();
         playerData.player.connect(filter);
         break;
     }
-    
+
     console.log(`🎛️ ${effectType} added to pad ${padIndex + 1}`);
   }
 
@@ -203,11 +221,11 @@ export class AudioService {
         playerData.player.dispose();
       }
     });
-    
+
     if (this.sequence) {
       this.sequence.dispose();
     }
-    
+
     console.log('🧹 Audio service disposed');
   }
 }
