@@ -24,7 +24,7 @@ export class SequencerComponent implements OnInit, OnDestroy {
   selectedStep = computed(() => this.sequencerService.selectedStep());
 
   // 🎚️ Control values
-  tempBPM = signal(80);
+  tempBPM = signal(120);
   tempSwing = signal(0);
   tempHumanize = signal(0);
 
