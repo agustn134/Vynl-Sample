@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import * as Tone from 'tone';
 
 interface SampleData {
@@ -16,8 +16,16 @@ export class AudioService {
   private sequence: Tone.Sequence | null = null;
   private currentStep = 0;
 
+  private _isPlaying = signal(false);
+
+
   constructor() {
     this.initializePlayers();
+  }
+
+  // 🆕 Agregar este getter público
+  isPlaying() {
+    return this._isPlaying();
   }
 
   async initialize(): Promise<void> {
@@ -48,30 +56,44 @@ export class AudioService {
     }
   }
 
-  async playPad(padIndex: number): Promise<void> {
-    if (!this.isInitialized) {
-      await this.initialize();
-    }
-
-    const playerData = this.players[padIndex];
-
-    if (playerData && playerData.isLoaded && playerData.player.loaded) {
-      try {
-        // Detener si ya está reproduciendo
-        if (playerData.player.state === 'started') {
-          playerData.player.stop();
-        }
-
-        // Reproducir el sample
-        playerData.player.start();
-        console.log(`🔊 Playing pad ${padIndex + 1}`);
-      } catch (error) {
-        console.error(`Error playing pad ${padIndex}:`, error);
-      }
-    } else {
-      console.log(`⚠️ Pad ${padIndex + 1} has no sample loaded`);
-    }
+  async playPad(padIndex: number, volume: number = 1): Promise<void> {
+  if (!this.isInitialized) {
+    await this.initialize();
   }
+
+  const playerData = this.players[padIndex];
+
+  if (playerData && playerData.isLoaded && playerData.player.loaded) {
+    try {
+      // Aplicar volumen
+      playerData.player.volume.value = Tone.gainToDb(volume);
+
+      // Detener si ya está reproduciendo
+      if (playerData.player.state === 'started') {
+        playerData.player.stop();
+      }
+
+      // Reproducir el sample
+      playerData.player.start();
+      console.log(`🔊 Playing pad ${padIndex + 1} (vol: ${Math.round(volume * 100)}%)`);
+    } catch (error) {
+      console.error(`Error playing pad ${padIndex}:`, error);
+    }
+  } else {
+    console.log(`⚠️ Pad ${padIndex + 1} has no sample loaded`);
+  }
+}
+
+// Método para detener todos los pads (Panic)
+stopAllPads(): void {
+  this.players.forEach((playerData, index) => {
+    if (playerData.player.state === 'started') {
+      playerData.player.stop();
+    }
+  });
+  console.log('🛑 All pads stopped (Panic)');
+}
+
 
   async loadSampleToPad(padIndex: number, audioUrl: string): Promise<boolean> {
     if (!this.isInitialized) {
@@ -162,17 +184,27 @@ export class AudioService {
 
   startSequencer(): void {
     if (!this.sequence) {
-      // TODO: Implementar secuenciador
       console.log('🎯 Sequencer will be implemented next');
     }
 
     Tone.Transport.start();
+    this._isPlaying.set(true); // 🆕 Actualizar estado
     console.log('▶️ Transport started');
   }
 
   stopSequencer(): void {
     Tone.Transport.stop();
+    this._isPlaying.set(false); // 🆕 Actualizar estado
     console.log('⏹️ Transport stopped');
+  }
+
+  // 🆕 Agregar método para alternar play/stop
+  togglePlayback(): void {
+    if (this._isPlaying()) {
+      this.stopSequencer();
+    } else {
+      this.startSequencer();
+    }
   }
 
   getPadStatus(padIndex: number): { isLoaded: boolean; isPlaying: boolean } {

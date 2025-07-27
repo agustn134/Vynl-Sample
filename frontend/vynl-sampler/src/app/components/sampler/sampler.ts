@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AudioService } from '../../services/audio';
+import { AudioService } from '../../services/audio.service';
+import { InputService } from '../../services/input.service';
 
 interface Pad {
   id: number;
@@ -22,12 +23,23 @@ export class SamplerComponent implements OnInit {
   isPlaying = signal(false);
   bpm = signal(120);
 
-  constructor(private audioService: AudioService) {
+  constructor(private audioService: AudioService, private inputService: InputService) {
     this.initializePads();
+
   }
 
   async ngOnInit() {
     await this.audioService.initialize();
+    this.inputService.startListening();
+
+    // Mostrar layout en consola
+    setTimeout(() => {
+      this.inputService.showKeyboardLayout();
+    }, 1000);
+  }
+
+   ngOnDestroy() {
+    this.inputService.stopListening();
   }
 
   initializePads() {
@@ -82,10 +94,15 @@ export class SamplerComponent implements OnInit {
     return classes;
   }
 
+  // togglePlay() {
+  //   this.isPlaying.set(!this.isPlaying());
+  //   // TODO: Implementar secuenciador
+  // }
+
   togglePlay() {
-    this.isPlaying.set(!this.isPlaying());
-    // TODO: Implementar secuenciador
-  }
+  this.audioService.togglePlayback(); // 🔧 Usar el nuevo método
+  this.isPlaying.set(this.audioService.isPlaying()); // Sincronizar estado
+}
 
   onFileSelected(event: any) {
     const files = event.target.files;
