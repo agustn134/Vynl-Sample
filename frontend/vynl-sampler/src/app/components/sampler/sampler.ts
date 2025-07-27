@@ -51,19 +51,25 @@ export class SamplerComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    await this.audioService.initialize();
-     await this.waveformService.initialize();
-    this.inputService.startListening();
+  await this.audioService.initialize();
+  await this.waveformService.initialize();
+  
+  // 🆕 Registrar este componente en el InputService
+  this.inputService.setSamplerComponent(this);
+  
+  this.inputService.startListening();
 
-    // Mostrar layout en consola
-    setTimeout(() => {
-      this.inputService.showKeyboardLayout();
-    }, 1000);
-  }
+  // Mostrar layout en consola
+  setTimeout(() => {
+    this.inputService.showKeyboardLayout();
+  }, 1000);
+}
 
   ngOnDestroy() {
-    this.inputService.stopListening();
-  }
+  this.inputService.stopListening();
+  // 🆕 Limpiar referencia
+  this.inputService.setSamplerComponent(null);
+}
 
   initializePads() {
     const padsArray: Pad[] = [];
@@ -94,28 +100,80 @@ export class SamplerComponent implements OnInit, OnDestroy {
     this.padControls.set(controlsArray);
   }
 
-  // 🎵 Funciones de reproducción existentes
-  async playPad(padIndex: number) {
-    const currentPads = this.pads();
+//   // 🎵 Funciones de reproducción existentes
+//   async playPad(padIndex: number) {
+//   const currentPads = this.pads();
 
-    // Activar visualmente
-    currentPads[padIndex].isActive = true;
-    this.pads.set([...currentPads]);
+//   // 🆕 Auto-seleccionar el pad al presionarlo
+//   if (this.selectedPad() !== padIndex) {
+//     this.selectedPad.set(padIndex);
+//     console.log(`🎯 Pad ${padIndex + 1} auto-selected`);
+//   }
 
-    // Reproducir audio con volumen del pad
-    if (currentPads[padIndex].isLoaded) {
-      const volume = currentPads[padIndex].volume / 100;
-      await this.audioService.playPad(padIndex, volume);
-    } else {
-      console.log(`🎵 Loading demo sample for pad ${padIndex + 1}`);
-    }
+//   // Activar visualmente
+//   currentPads[padIndex].isActive = true;
+//   this.pads.set([...currentPads]);
 
-    // Desactivar después de 200ms
-    setTimeout(() => {
-      currentPads[padIndex].isActive = false;
-      this.pads.set([...currentPads]);
-    }, 200);
+//   // Reproducir audio con volumen del pad
+//   if (currentPads[padIndex].isLoaded) {
+//     const volume = currentPads[padIndex].volume / 100;
+//     await this.audioService.playPad(padIndex, volume);
+
+//     // 🆕 Actualizar waveform inmediatamente al reproducir
+//     setTimeout(() => {
+//       this.updateWaveform();
+//     }, 10);
+//   } else {
+//     console.log(`🎵 Loading demo sample for pad ${padIndex + 1}`);
+//     // 🆕 Mostrar placeholder para pads vacíos
+//     setTimeout(() => {
+//       this.updateWaveform();
+//     }, 10);
+//   }
+
+//   // Desactivar después de 200ms
+//   setTimeout(() => {
+//     currentPads[padIndex].isActive = false;
+//     this.pads.set([...currentPads]);
+//   }, 200);
+// }
+
+async playPad(padIndex: number) {
+  const currentPads = this.pads();
+
+  // 🆕 Auto-seleccionar el pad al presionarlo
+  if (this.selectedPad() !== padIndex) {
+    this.selectedPad.set(padIndex);
+    console.log(`🎯 Pad ${padIndex + 1} auto-selected`);
   }
+
+  // Activar visualmente
+  currentPads[padIndex].isActive = true;
+  this.pads.set([...currentPads]);
+
+  // Reproducir audio con volumen del pad
+  if (currentPads[padIndex].isLoaded) {
+    const volume = currentPads[padIndex].volume / 100;
+    await this.audioService.playPad(padIndex, volume);
+
+    // 🆕 Actualizar waveform inmediatamente al reproducir
+    setTimeout(() => {
+      this.updateWaveform();
+    }, 10);
+  } else {
+    console.log(`🎵 Loading demo sample for pad ${padIndex + 1}`);
+    // 🆕 Mostrar placeholder para pads vacíos
+    setTimeout(() => {
+      this.updateWaveform();
+    }, 10);
+  }
+
+  // Desactivar después de 200ms
+  setTimeout(() => {
+    currentPads[padIndex].isActive = false;
+    this.pads.set([...currentPads]);
+  }, 200);
+}
 
   getPadClass(pad: Pad): string {
     let classes = 'w-full h-20 backdrop-blur-sm border rounded-lg transition-all duration-80 transform active:scale-96 shadow-soft hover:shadow-crisp relative overflow-hidden group ';
@@ -131,22 +189,41 @@ export class SamplerComponent implements OnInit, OnDestroy {
     return classes;
   }
 
-  updateWaveform(): void {
+updateWaveform(): void {
   const selected = this.selectedPad();
-  if (selected === null || !this.waveformCanvas) return;
+  if (selected === null || !this.waveformCanvas) {
+    console.log('⚠️ No pad selected or canvas not ready');
+    return;
+  }
 
   const canvas = this.waveformCanvas.nativeElement;
-  const buffer = this.audioService.getPadBuffer(selected);
+  
+  // 🆕 Usar el método correcto para obtener datos del waveform
+  const waveformData = this.audioService.getPadWaveformData(selected);
+  const currentPads = this.pads();
+  const pad = currentPads[selected];
 
-  if (buffer && buffer.loaded) {
-    this.waveformService.drawStaticWaveform(canvas, buffer);
+  if (waveformData && waveformData.length > 0 && pad.isLoaded) {
+    this.waveformService.drawStaticWaveform(canvas, waveformData);
+    console.log(`🌊 Waveform displayed for pad ${selected + 1} (${waveformData.length} samples)`);
   } else {
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      this.waveformService.drawPlaceholder(ctx, canvas.width, canvas.height);
+    this.waveformService.drawPlaceholder(canvas);
+    if (pad.isLoaded) {
+      console.log(`⚠️ Pad ${selected + 1} loaded but no waveform data`);
+      // 🆕 Debug para ver qué está pasando
+      this.audioService.debugPadData(selected);
+    } else {
+      console.log(`📭 Pad ${selected + 1} is empty - showing placeholder`);
     }
   }
 }
+
+// 🆕 Método para manejar la interacción desde teclado/MIDI
+triggerPadFromInput(padIndex: number): void {
+  // Este método será llamado desde el InputService
+  this.playPad(padIndex);
+}
+
 
   togglePlay() {
     this.audioService.togglePlayback();
@@ -317,20 +394,26 @@ export class SamplerComponent implements OnInit, OnDestroy {
     }
   }
 
-  async loadFileToEmptyPad(file: File, padIndex: number) {
-    const success = await this.audioService.loadSampleFromFile(padIndex, file);
+  // 🆕 Actualizar loadFileToEmptyPad para refresh automático
+async loadFileToEmptyPad(file: File, padIndex: number) {
+  const success = await this.audioService.loadSampleFromFile(padIndex, file);
 
-    if (success) {
-      const currentPads = this.pads();
-      currentPads[padIndex].isLoaded = true;
-      currentPads[padIndex].sample = file.name;
-      currentPads[padIndex].sampleName = file.name.replace(/\.[^/.]+$/, ''); // Sin extensión
-      this.pads.set([...currentPads]);
+  if (success) {
+    const currentPads = this.pads();
+    currentPads[padIndex].isLoaded = true;
+    currentPads[padIndex].sample = file.name;
+    currentPads[padIndex].sampleName = file.name.replace(/\.[^/.]+$/, '');
+    this.pads.set([...currentPads]);
 
-      // Auto-seleccionar el pad cargado
-      this.selectedPad.set(padIndex);
+    // Auto-seleccionar y actualizar waveform
+    this.selectedPad.set(padIndex);
 
-      console.log(`✅ ${file.name} loaded to pad ${padIndex + 1}`);
-    }
+    // 🆕 Esperar un poco más para que el buffer se procese
+    setTimeout(() => {
+      this.updateWaveform();
+    }, 100);
+
+    console.log(`✅ ${file.name} loaded to pad ${padIndex + 1} with waveform`);
   }
+}
 }

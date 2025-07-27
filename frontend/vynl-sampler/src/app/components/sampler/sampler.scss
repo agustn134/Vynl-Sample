@@ -19,6 +19,89 @@
   }
 }
 
+
+
+// En sampler.component.scss
+
+.canvas-waveform {
+  background: transparent;
+  image-rendering: crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: pixelated;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+// Animación suave para el contenedor del waveform
+.waveform-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+      0 4px 20px rgba(33, 37, 41, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+}
+
+// Glow effect para el pad seleccionado
+.selected-pad-glow {
+  box-shadow: 
+    0 0 20px rgba(33, 37, 41, 0.4),
+    0 0 0 2px rgba(255, 255, 255, 0.2);
+  border-color: #ffffff !important;
+  animation: pulse 2s infinite;
+}
+
+// Efecto de respiración para elementos activos
+@keyframes breathe {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+  }
+}
+
+
+// En sampler.component.scss, agregar:
+
+// canvas {
+//   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+//   border-radius: 6px;
+//   border: 1px solid rgba(108, 117, 125, 0.2);
+//   image-rendering: crisp-edges;
+//   transition: all 0.2s ease;
+  
+//   &:hover {
+//     border-color: rgba(108, 117, 125, 0.4);
+//   }
+// }
+
+// // 🆕 Animación para el pad seleccionado
+// .selected-pad-glow {
+//   box-shadow: 0 0 15px rgba(33, 37, 41, 0.3);
+//   border-color: #212529 !important;
+// }
+
+
+// En sampler.component.scss, agregar estilos para el canvas:
+
+// canvas {
+//   background: linear-gradient(135deg, #6e6e6e 0%, #5e5e5e 100%);
+//   border-radius: 6px;
+//   border: 1px solid rgba(108, 117, 125, 0.2);
+//   image-rendering: crisp-edges;
+
+//   &:hover {
+//     border-color: rgba(108, 117, 125, 0.4);
+//     transition: border-color 0.2s ease;
+//   }
+// }
+
 // /* Animación shimmer */
 // @keyframes shimmer {
 //   0% { transform: translateX(-100%); }

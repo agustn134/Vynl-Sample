@@ -74,10 +74,11 @@
                     {{ pad.id + 1 }}
                   </div>
 
-                  <!-- 🆕 Indicador de Pad Seleccionado -->
+                  <!--  Indicador de Pad Seleccionado -->
                   <div *ngIf="selectedPad() === pad.id"
-                       class="absolute inset-0 border-2 border-vynl-purple rounded-lg pointer-events-none">
-                  </div>
+       class="absolute inset-0 border-2 border-vynl-carbon rounded-lg pointer-events-none
+              shadow-[0_0_10px_rgba(33,37,41,0.5)] animate-pulse">
+  </div>
 
                   <!-- Nombre del Sample -->
                   <div class="flex items-end justify-center h-full pb-2">
@@ -100,19 +101,44 @@
             CONTROLES {{ selectedPad() !== null ? 'PAD ' + (selectedPad()! + 1) : 'MASTER' }}
           </h3>
 
-          <!-- 🆕 Waveform Principal -->
-          <div class="mb-6">
-            <div class="bg-vynl-black/30 rounded-lg p-4 border border-vynl-slate/30">
-              <div class="text-center text-vynl-charcoal text-sm font-medium">
-                {{ selectedPad() !== null ? 'Waveform del Pad ' + (selectedPad()! + 1) : 'Selecciona un pad' }}
-              </div>
-               <canvas #waveformCanvas
-            width="280"
-            height="80"
-            class="w-full h-20 rounded bg-vynl-cloud/10">
-    </canvas>
-            </div>
-          </div>
+          <!-- 🆕 Waveform Principal Mejorado -->
+<!-- Versión alternativa más minimalista -->
+<div class="mb-6">
+  <div class="bg-gradient-to-br from-vynl-carbon/10 to-vynl-carbon/30 
+              backdrop-blur-xl rounded-2xl p-5 border border-vynl-slate/30 
+              shadow-soft hover:shadow-crisp transition-all duration-300 
+              hover:bg-gradient-to-br hover:from-vynl-carbon/15 hover:to-vynl-carbon/35">
+    
+    <div class="text-center text-vynl-white text-xs font-bold mb-4 tracking-widest opacity-90">
+      {{ selectedPad() !== null ? 'WAVEFORM · PAD ' + (selectedPad()! + 1) : 'SELECCIONA UN PAD' }}
+    </div>
+    
+    <div class="relative w-full aspect-[5/1] bg-vynl-carbon/50 rounded-xl border border-vynl-graphite/40 
+                overflow-hidden shadow-inner">
+      <canvas #waveformCanvas
+              width="400"
+              height="80"
+              class="absolute inset-0 w-full h-full canvas-waveform">
+      </canvas>
+      
+      <!-- Overlay sutil -->
+      <div class="absolute inset-0 bg-gradient-to-t from-vynl-carbon/20 to-transparent 
+                  pointer-events-none"></div>
+      
+      <!-- Indicador de actividad -->
+      <div class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-vynl-white/60 
+                  opacity-0 transition-opacity duration-300"
+           [class.opacity-100]="selectedPad() !== null && pads()[selectedPad()!].isLoaded">
+      </div>
+    </div>
+    
+    <div class="mt-3 text-center" *ngIf="selectedPad() !== null">
+      <div class="text-xs text-vynl-slate/80 font-medium truncate">
+        {{ pads()[selectedPad()!].isLoaded ? pads()[selectedPad()!].sampleName : 'Arrastra un archivo de audio' }}
+      </div>
+    </div>
+  </div>
+</div>
 
           <!-- 🆕 Controles de Audio -->
           <div class="space-y-6" *ngIf="selectedPad() !== null">

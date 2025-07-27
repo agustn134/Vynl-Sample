@@ -14,6 +14,8 @@ export class InputService {
   private isListening = false;
   private pressedKeys = new Set<string>();
 
+    private samplerComponent: any = null;
+
   // Mapeo QWERTY (2 filas de 8)
   private qwertyMapping: KeyMapping[] = [
     // Fila superior (pads 0-7)
@@ -43,6 +45,12 @@ export class InputService {
   ];
 
   constructor(private audioService: AudioService) {}
+
+  // 🆕 Método para registrar el componente del sampler
+  setSamplerComponent(component: any): void {
+    this.samplerComponent = component;
+    console.log('🔗 Sampler component registered with InputService');
+  }
 
   startListening(): void {
     if (this.isListening) return;
@@ -154,7 +162,14 @@ export class InputService {
     // Calcular volumen basado en velocity MIDI
     const volume = source === 'MIDI' ? (velocity / 127) : 1;
 
-    this.audioService.playPad(padIndex, volume);
+    // 🆕 Si hay componente registrado, usar su método playPad para sincronizar
+    if (this.samplerComponent && this.samplerComponent.playPad) {
+      this.samplerComponent.playPad(padIndex);
+    } else {
+      // Fallback al método directo del audio service
+      this.audioService.playPad(padIndex, volume);
+    }
+
     console.log(`🎵 Pad ${padIndex + 1} triggered via ${source}`);
   }
 
