@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+// src/app/components/sampler/sampler.component.ts - VERSIÓN CORREGIDA Y OPTIMIZADA
+import { Component, OnInit, OnDestroy, signal, ElementRef, ViewChild, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AudioService } from '../../services/audio.service';
 import { InputService } from '../../services/input.service';
@@ -24,56 +25,84 @@ interface PadControls {
 
 @Component({
   selector: 'app-sampler',
+  changeDetection: ChangeDetectionStrategy.OnPush, // ⚡ PERFORMANCE BOOST
   standalone: true,
-  imports: [CommonModule,SequencerComponent ],
+  imports: [CommonModule, SequencerComponent],
   templateUrl: './sampler.html',
   styleUrls: ['./sampler.scss'],
 })
-export class SamplerComponent implements OnInit, OnDestroy {
+export class SamplerComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('waveformCanvas', { static: false }) waveformCanvas!: ElementRef<HTMLCanvasElement>;
 
-
+  // 🎯 State Signals
   pads = signal<Pad[]>([]);
   isPlaying = signal(false);
   bpm = signal(120);
-
-  // 🆕 Nuevos signals para controles
   selectedPad = signal<number | null>(null);
   padControls = signal<PadControls[]>([]);
-
   showSequencer = signal(false);
 
+  // ⚡ TrackBy functions para performance
+  trackByPadId = (index: number, pad: Pad) => pad.id;
+
+  // ⚡ Debounced methods para evitar spam
+  private debouncedVolumeUpdate = this.debounce((volume: number) => {
+    const selected = this.selectedPad();
+    if (selected !== null) {
+      this.audioService.setPadVolume(selected, volume / 100);
+    }
+  }, 16);
+
+  private debouncedPitchUpdate = this.debounce((pitch: number) => {
+    const selected = this.selectedPad();
+    if (selected !== null) {
+      this.audioService.setPadPitch(selected, pitch);
+    }
+  }, 16);
+
+  // ⚡ Performance timers
+  private animationTimeouts = new Map<number, any>();
 
   constructor(
     public audioService: AudioService,
     private inputService: InputService,
-    private waveformService: WaveformService
+    private waveformService: WaveformService,
+    private cdr: ChangeDetectorRef
   ) {
     this.initializePads();
     this.initializePadControls();
   }
 
   async ngOnInit() {
-  await this.audioService.initialize();
-  await this.waveformService.initialize();
-  
-  // 🆕 Registrar este componente en el InputService
-  this.inputService.setSamplerComponent(this);
-  
-  this.inputService.startListening();
+    await this.audioService.initialize();
+    await this.waveformService.initialize();
+    
+    // Registrar componente para input
+    this.inputService.setSamplerComponent(this);
+    this.inputService.startListening();
 
-  // Mostrar layout en consola
-  setTimeout(() => {
-    this.inputService.showKeyboardLayout();
-  }, 1000);
-}
+    // Layout info después de init
+    setTimeout(() => {
+      this.inputService.showKeyboardLayout();
+    }, 1000);
+  }
+
+  ngAfterViewInit() {
+    // Canvas listo para waveforms
+    setTimeout(() => {
+      this.updateWaveform();
+    }, 100);
+  }
 
   ngOnDestroy() {
-  this.inputService.stopListening();
-  // 🆕 Limpiar referencia
-  this.inputService.setSamplerComponent(null);
-}
+    this.inputService.stopListening();
+    this.inputService.setSamplerComponent(null);
+    
+    // ⚡ Limpiar timeouts
+    this.animationTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.animationTimeouts.clear();
+  }
 
   initializePads() {
     const padsArray: Pad[] = [];
@@ -92,12 +121,6 @@ export class SamplerComponent implements OnInit, OnDestroy {
     this.pads.set(padsArray);
   }
 
-  // 🆕 Método para toggle del secuenciador
-  toggleSequencer(): void {
-    this.showSequencer.set(!this.showSequencer());
-    console.log(`🎹 Sequencer ${this.showSequencer() ? 'shown' : 'hidden'}`);
-  }
-
   initializePadControls() {
     const controlsArray: PadControls[] = [];
     for (let i = 0; i < 16; i++) {
@@ -110,170 +133,167 @@ export class SamplerComponent implements OnInit, OnDestroy {
     this.padControls.set(controlsArray);
   }
 
-//   // 🎵 Funciones de reproducción existentes
-//   async playPad(padIndex: number) {
-//   const currentPads = this.pads();
+  // ⚡ MÉTODO OPTIMIZADO: playPad
+  async playPad(padIndex: number): Promise<void> {
+    // Auto-seleccionar pad
+    if (this.selectedPad() !== padIndex) {
+      this.selectedPad.set(padIndex);
+    }
 
-//   // 🆕 Auto-seleccionar el pad al presionarlo
-//   if (this.selectedPad() !== padIndex) {
-//     this.selectedPad.set(padIndex);
-//     console.log(`🎯 Pad ${padIndex + 1} auto-selected`);
-//   }
+    // Visual feedback inmediato
+    this.updatePadVisualState(padIndex);
+    
+    // Audio en paralelo
+    const currentPads = this.pads();
+    if (currentPads[padIndex].isLoaded) {
+      const volume = currentPads[padIndex].volume / 100;
+      this.audioService.playPad(padIndex, volume);
+      
+      // Actualizar waveform después de tocar
+      setTimeout(() => this.updateWaveform(), 10);
+    }
+  }
 
-//   // Activar visualmente
-//   currentPads[padIndex].isActive = true;
-//   this.pads.set([...currentPads]);
+  // ⚡ MÉTODO OPTIMIZADO: Update visual sin bloquear audio
+  private updatePadVisualState(padIndex: number): void {
+    const pads = this.pads();
+    if (!pads[padIndex]) return;
 
-//   // Reproducir audio con volumen del pad
-//   if (currentPads[padIndex].isLoaded) {
-//     const volume = currentPads[padIndex].volume / 100;
-//     await this.audioService.playPad(padIndex, volume);
+    // Cancelar animación anterior si existe
+    if (this.animationTimeouts.has(padIndex)) {
+      clearTimeout(this.animationTimeouts.get(padIndex));
+    }
 
-//     // 🆕 Actualizar waveform inmediatamente al reproducir
-//     setTimeout(() => {
-//       this.updateWaveform();
-//     }, 10);
-//   } else {
-//     console.log(`🎵 Loading demo sample for pad ${padIndex + 1}`);
-//     // 🆕 Mostrar placeholder para pads vacíos
-//     setTimeout(() => {
-//       this.updateWaveform();
-//     }, 10);
-//   }
+    // Activar pad
+    pads[padIndex].isActive = true;
+    this.pads.set([...pads]);
+    this.cdr.detectChanges();
 
-//   // Desactivar después de 200ms
-//   setTimeout(() => {
-//     currentPads[padIndex].isActive = false;
-//     this.pads.set([...currentPads]);
-//   }, 200);
-// }
+    // Desactivar después de 80ms (ultra rápido)
+    const timeout = setTimeout(() => {
+      const currentPads = this.pads();
+      if (currentPads[padIndex]) {
+        currentPads[padIndex].isActive = false;
+        this.pads.set([...currentPads]);
+        this.cdr.detectChanges();
+      }
+      this.animationTimeouts.delete(padIndex);
+    }, 80);
 
-async playPad(padIndex: number) {
-  const currentPads = this.pads();
+    this.animationTimeouts.set(padIndex, timeout);
+  }
 
-  // 🆕 Auto-seleccionar el pad al presionarlo
-  if (this.selectedPad() !== padIndex) {
+  // ⚡ MÉTODO OPTIMIZADO: File loading
+  async onFileSelected(event: any) {
+    const files = event.target.files;
+    if (!files?.length) return;
+
+    const selected = this.selectedPad() ?? this.findFirstEmptyPad();
+    if (selected === null) {
+      console.log('⚠️ No hay pads disponibles');
+      return;
+    }
+
+    // Loading state visual
+    this.updateLoadingState(selected, true);
+
+    try {
+      const success = await this.audioService.loadSampleFromFile(selected, files[0]);
+      
+      if (success) {
+        this.updatePadState(selected, files[0].name);
+        
+        // Actualizar waveform después de cargar
+        setTimeout(() => this.updateWaveform(), 150);
+      }
+    } catch (error) {
+      console.error('Error loading file:', error);
+    } finally {
+      this.updateLoadingState(selected, false);
+    }
+  }
+
+  // ⚡ MÉTODOS HELPER optimizados
+  private findFirstEmptyPad(): number | null {
+    const pads = this.pads();
+    const emptyIndex = pads.findIndex(pad => !pad.isLoaded);
+    return emptyIndex !== -1 ? emptyIndex : null;
+  }
+
+  private updateLoadingState(padIndex: number, loading: boolean): void {
+    // Puedes agregar un spinner o estado visual aquí
+    this.cdr.detectChanges();
+  }
+
+  private updatePadState(padIndex: number, fileName: string): void {
+    const pads = this.pads();
+    if (pads[padIndex]) {
+      pads[padIndex].isLoaded = true;
+      pads[padIndex].sample = fileName;
+      pads[padIndex].sampleName = fileName.substring(0, 12); // Truncar nombre
+      this.pads.set([...pads]);
+      this.cdr.detectChanges();
+    }
+  }
+
+  // ⚡ MÉTODO OPTIMIZADO: Debounce utility
+  private debounce(func: Function, wait: number) {
+    let timeout: any;
+    return (...args: any[]) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  // 🎯 MÉTODOS UI optimizados
+  toggleSequencer(): void {
+    this.showSequencer.set(!this.showSequencer());
+    this.cdr.detectChanges();
+  }
+
+  selectPad(padIndex: number): void {
     this.selectedPad.set(padIndex);
-    console.log(`🎯 Pad ${padIndex + 1} auto-selected`);
+    setTimeout(() => this.updateWaveform(), 0);
+    this.cdr.detectChanges();
   }
-
-  // Activar visualmente
-  currentPads[padIndex].isActive = true;
-  this.pads.set([...currentPads]);
-
-  // Reproducir audio con volumen del pad
-  if (currentPads[padIndex].isLoaded) {
-    const volume = currentPads[padIndex].volume / 100;
-    await this.audioService.playPad(padIndex, volume);
-
-    // 🆕 Actualizar waveform inmediatamente al reproducir
-    setTimeout(() => {
-      this.updateWaveform();
-    }, 10);
-  } else {
-    console.log(`🎵 Loading demo sample for pad ${padIndex + 1}`);
-    // 🆕 Mostrar placeholder para pads vacíos
-    setTimeout(() => {
-      this.updateWaveform();
-    }, 10);
-  }
-
-  // Desactivar después de 200ms
-  setTimeout(() => {
-    currentPads[padIndex].isActive = false;
-    this.pads.set([...currentPads]);
-  }, 200);
-}
 
   getPadClass(pad: Pad): string {
-    let classes = 'w-full h-20 backdrop-blur-sm border rounded-lg transition-all duration-80 transform active:scale-96 shadow-soft hover:shadow-crisp relative overflow-hidden group ';
+    let classes = 'w-full h-20 border rounded-lg relative overflow-hidden cursor-pointer ';
 
     if (pad.isActive) {
-      classes += 'bg-vynl-carbon border-vynl-carbon animate-pad-hit ';
+      classes += 'bg-vynl-carbon border-vynl-carbon transform scale-95 ';
     } else if (pad.isLoaded) {
       classes += 'bg-vynl-steel/20 border-vynl-steel hover:bg-vynl-steel/30 ';
     } else {
       classes += 'bg-white/10 border-white/30 hover:bg-white/20 ';
     }
 
+    // Pad seleccionado
+    if (this.selectedPad() === pad.id) {
+      classes += 'ring-2 ring-vynl-carbon ';
+    }
+
     return classes;
   }
 
-updateWaveform(): void {
-  const selected = this.selectedPad();
-  if (selected === null || !this.waveformCanvas) {
-    console.log('⚠️ No pad selected or canvas not ready');
-    return;
-  }
+  updateWaveform(): void {
+    const selected = this.selectedPad();
+    if (selected === null || !this.waveformCanvas) return;
 
-  const canvas = this.waveformCanvas.nativeElement;
-  
-  // 🆕 Usar el método correcto para obtener datos del waveform
-  const waveformData = this.audioService.getPadWaveformData(selected);
-  const currentPads = this.pads();
-  const pad = currentPads[selected];
+    const canvas = this.waveformCanvas.nativeElement;
+    const waveformData = this.audioService.getPadWaveformData(selected);
+    const currentPads = this.pads();
+    const pad = currentPads[selected];
 
-  if (waveformData && waveformData.length > 0 && pad.isLoaded) {
-    this.waveformService.drawStaticWaveform(canvas, waveformData);
-    console.log(`🌊 Waveform displayed for pad ${selected + 1} (${waveformData.length} samples)`);
-  } else {
-    this.waveformService.drawPlaceholder(canvas);
-    if (pad.isLoaded) {
-      console.log(`⚠️ Pad ${selected + 1} loaded but no waveform data`);
-      // 🆕 Debug para ver qué está pasando
-      this.audioService.debugPadData(selected);
+    if (waveformData && waveformData.length > 0 && pad.isLoaded) {
+      this.waveformService.drawStaticWaveform(canvas, waveformData);
     } else {
-      console.log(`📭 Pad ${selected + 1} is empty - showing placeholder`);
+      this.waveformService.drawPlaceholder(canvas);
     }
   }
-}
 
-
-loadedPadsCount(): number {
-  return this.pads().filter(pad => pad.isLoaded).length;
-}
-
-// Método para mostrar el estado del audio engine
-get audioEngineStatus(): string {
-  return this.audioService['isInitialized'] ? 'ready' : 'loading';
-}
-
-// 🆕 Método para manejar la interacción desde teclado/MIDI
-triggerPadFromInput(padIndex: number): void {
-  // Este método será llamado desde el InputService
-  this.playPad(padIndex);
-}
-
-
-  togglePlay() {
-    this.audioService.togglePlayback();
-    this.isPlaying.set(this.audioService.isPlaying());
-  }
-
-  // 🆕 Funciones del panel de controles
-  selectPad(padIndex: number) {
-    this.selectedPad.set(padIndex);
-    console.log(`🎯 Pad ${padIndex + 1} selected`);
-    setTimeout(() => this.updateWaveform(), 0)
-  }
-
-  currentPadVolume(): number {
-    const selected = this.selectedPad();
-    if (selected === null) return 80;
-
-    const pads = this.pads();
-    return pads[selected]?.volume || 80;
-  }
-
-  currentPadPitch(): number {
-    const selected = this.selectedPad();
-    if (selected === null) return 0;
-
-    const pads = this.pads();
-    return pads[selected]?.pitch || 0;
-  }
-
-  setPadVolume(event: any) {
+  // 🎚️ CONTROLES optimizados con debounce
+  setPadVolume(event: any): void {
     const selected = this.selectedPad();
     if (selected === null) return;
 
@@ -282,13 +302,12 @@ triggerPadFromInput(padIndex: number): void {
     currentPads[selected].volume = newVolume;
     this.pads.set([...currentPads]);
 
-    // Aplicar al audio service
-    this.audioService.setPadVolume(selected, newVolume / 100);
-
-    console.log(`🔊 Pad ${selected + 1} volume: ${newVolume}%`);
+    // Debounced update para evitar spam
+    this.debouncedVolumeUpdate(newVolume);
+    this.cdr.detectChanges();
   }
 
-  setPadPitch(event: any) {
+  setPadPitch(event: any): void {
     const selected = this.selectedPad();
     if (selected === null) return;
 
@@ -297,52 +316,65 @@ triggerPadFromInput(padIndex: number): void {
     currentPads[selected].pitch = newPitch;
     this.pads.set([...currentPads]);
 
-    // Aplicar al audio service
-    this.audioService.setPadPitch(selected, newPitch);
-
-    console.log(`🎵 Pad ${selected + 1} pitch: ${newPitch > 0 ? '+' : ''}${newPitch}`);
+    // Debounced update para evitar spam
+    this.debouncedPitchUpdate(newPitch);
+    this.cdr.detectChanges();
   }
 
-  toggleEffect(effectType: 'reverb' | 'delay' | 'filter') {
+  toggleEffect(effectType: 'reverb' | 'delay' | 'filter'): void {
     const selected = this.selectedPad();
     if (selected === null) return;
 
     const currentPads = this.pads();
     const pad = currentPads[selected];
-
     const effectIndex = pad.effects.indexOf(effectType);
 
     if (effectIndex > -1) {
-      // Remover efecto
       pad.effects.splice(effectIndex, 1);
       this.audioService.removeEffectFromPad(selected, effectType);
-      console.log(`🎛️ ${effectType} removed from pad ${selected + 1}`);
     } else {
-      // Agregar efecto
       pad.effects.push(effectType);
       this.audioService.addEffectToPad(selected, effectType);
-      console.log(`🎛️ ${effectType} added to pad ${selected + 1}`);
     }
 
     this.pads.set([...currentPads]);
+    this.cdr.detectChanges();
+  }
+
+  // 🎯 GETTERS optimizados
+  currentPadVolume(): number {
+    const selected = this.selectedPad();
+    if (selected === null) return 80;
+    return this.pads()[selected]?.volume || 80;
+  }
+
+  currentPadPitch(): number {
+    const selected = this.selectedPad();
+    if (selected === null) return 0;
+    return this.pads()[selected]?.pitch || 0;
   }
 
   hasEffect(effectType: string): boolean {
     const selected = this.selectedPad();
     if (selected === null) return false;
-
-    const pads = this.pads();
-    return pads[selected]?.effects.includes(effectType) || false;
+    return this.pads()[selected]?.effects.includes(effectType) || false;
   }
 
-  clearSelectedPad() {
+  loadedPadsCount(): number {
+    return this.pads().filter(pad => pad.isLoaded).length;
+  }
+
+  get audioEngineStatus(): string {
+    return this.audioService.isInitialized ? 'ready' : 'loading';
+  }
+
+  // 🗑️ ACCIONES de pad
+  clearSelectedPad(): void {
     const selected = this.selectedPad();
     if (selected === null) return;
 
-    // Limpiar en audio service
     this.audioService.clearPad(selected);
 
-    // Limpiar en el estado
     const currentPads = this.pads();
     currentPads[selected] = {
       id: selected,
@@ -356,10 +388,11 @@ triggerPadFromInput(padIndex: number): void {
     };
 
     this.pads.set([...currentPads]);
-    console.log(`🗑️ Pad ${selected + 1} cleared`);
+    this.updateWaveform();
+    this.cdr.detectChanges();
   }
 
-  duplicatePad() {
+  duplicatePad(): void {
     const selected = this.selectedPad();
     if (selected === null) return;
 
@@ -371,18 +404,14 @@ triggerPadFromInput(padIndex: number): void {
       return;
     }
 
-    // Buscar primer pad vacío
     const emptyPadIndex = pads.findIndex(pad => !pad.isLoaded);
-
     if (emptyPadIndex === -1) {
       console.log('⚠️ No hay pads vacíos disponibles');
       return;
     }
 
-    // Duplicar sample
     this.audioService.duplicatePad(selected, emptyPadIndex);
 
-    // Duplicar en el estado
     const currentPads = this.pads();
     currentPads[emptyPadIndex] = {
       ...sourcePad,
@@ -392,48 +421,29 @@ triggerPadFromInput(padIndex: number): void {
     };
 
     this.pads.set([...currentPads]);
-    console.log(`📋 Pad ${selected + 1} duplicated to pad ${emptyPadIndex + 1}`);
+    this.cdr.detectChanges();
   }
 
-  // 🆕 Función existente actualizada
-  onFileSelected(event: any) {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const selected = this.selectedPad();
+  // 🎵 PLAYBACK controls
+  togglePlay(): void {
+    this.audioService.togglePlayback();
+    this.isPlaying.set(this.audioService.isPlaying());
+    this.cdr.detectChanges();
+  }
 
-      // Si hay un pad seleccionado, cargar ahí. Si no, buscar vacío
-      const targetPadIndex = selected !== null ? selected :
-                           this.pads().findIndex((pad) => !pad.isLoaded);
+  // 🎹 INPUT integration
+  triggerPadFromInput(padIndex: number): void {
+    this.playPad(padIndex);
+  }
 
-      if (targetPadIndex !== -1) {
-        const file = files[0];
-        this.loadFileToEmptyPad(file, targetPadIndex);
-      } else {
-        console.log('⚠️ No hay pads disponibles');
-      }
+  // 📁 Legacy file loading method (mantener compatibilidad)
+  async loadFileToEmptyPad(file: File, padIndex: number): Promise<void> {
+    const success = await this.audioService.loadSampleFromFile(padIndex, file);
+
+    if (success) {
+      this.updatePadState(padIndex, file.name);
+      this.selectedPad.set(padIndex);
+      setTimeout(() => this.updateWaveform(), 100);
     }
   }
-
-  // 🆕 Actualizar loadFileToEmptyPad para refresh automático
-async loadFileToEmptyPad(file: File, padIndex: number) {
-  const success = await this.audioService.loadSampleFromFile(padIndex, file);
-
-  if (success) {
-    const currentPads = this.pads();
-    currentPads[padIndex].isLoaded = true;
-    currentPads[padIndex].sample = file.name;
-    currentPads[padIndex].sampleName = file.name.replace(/\.[^/.]+$/, '');
-    this.pads.set([...currentPads]);
-
-    // Auto-seleccionar y actualizar waveform
-    this.selectedPad.set(padIndex);
-
-    // 🆕 Esperar un poco más para que el buffer se procese
-    setTimeout(() => {
-      this.updateWaveform();
-    }, 100);
-
-    console.log(`✅ ${file.name} loaded to pad ${padIndex + 1} with waveform`);
-  }
-}
 }

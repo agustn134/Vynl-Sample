@@ -1,145 +1,206 @@
-/* Sampler específico - súper rápido */
+// sampler.component.scss - PERFORMANCE EDITION
 .sampler {
   user-select: none;
+  contain: layout style paint; // ⚡ Optimización crucial
 }
 
-/* Animaciones súper rápidas para pads */
-@keyframes padHit {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+// ⚡ Glass effect optimizado (sin backdrop-blur pesado)
+.glass-fast {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px); // Reducido de 12px a 4px
+  -webkit-backdrop-filter: blur(4px);
+}
+
+// 🎯 Pads optimizados - ZERO LAG
+.pad-grid {
+  contain: layout; // Evita reflows
+  
+  .pad-container {
+    contain: layout style;
   }
-  50% {
-    transform: scale(0.96);
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  
+  .pad-btn {
+    // ❌ NO transitions - Solo cambios inmediatos
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    
+    // Estados optimizados
+    &.loaded {
+      background: rgba(173, 181, 189, 0.2);
+      border-color: rgba(108, 117, 125, 0.5);
+    }
+    
+    &.active {
+      background: rgba(33, 37, 41, 0.9);
+      border-color: rgba(33, 37, 41, 1);
+      transform: scale(0.95); // Solo escala, sin shadow
+    }
+    
+    &.selected {
+      border-color: rgba(33, 37, 41, 1);
+      border-width: 2px;
+      background: rgba(33, 37, 41, 0.1);
+    }
+    
+    // ❌ ELIMINAR hover animations pesadas
+    &:hover {
+      filter: brightness(1.05); // Muy sutil
+    }
   }
 }
 
-
-
-// En sampler.component.scss
-
+// 🌊 Waveform ultra-optimizado
 .canvas-waveform {
-  background: transparent;
-  image-rendering: crisp-edges;
-  image-rendering: -webkit-optimize-contrast;
+  // Rendering más rápido
   image-rendering: pixelated;
-  transition: all 0.3s ease;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
   
-  &:hover {
-    filter: brightness(1.1);
-  }
+  // ❌ NO transitions
 }
 
-// Animación suave para el contenedor del waveform
 .waveform-container {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  contain: layout style paint;
   
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 
-      0 4px 20px rgba(33, 37, 41, 0.15),
-      0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
+  // ❌ NO hover animations
 }
 
-// Glow effect para el pad seleccionado
-.selected-pad-glow {
-  box-shadow: 
-    0 0 20px rgba(33, 37, 41, 0.4),
-    0 0 0 2px rgba(255, 255, 255, 0.2);
-  border-color: #ffffff !important;
-  animation: pulse 2s infinite;
-}
-
-// Efecto de respiración para elementos activos
-@keyframes breathe {
-  0%, 100% { 
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-  }
-  50% { 
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-  }
-}
-
-
-// En sampler.component.scss, agregar:
-
-// canvas {
-//   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-//   border-radius: 6px;
-//   border: 1px solid rgba(108, 117, 125, 0.2);
-//   image-rendering: crisp-edges;
-//   transition: all 0.2s ease;
+// 💡 LED optimizado
+.led-indicator {
+  background: rgba(173, 181, 189, 0.6);
   
-//   &:hover {
-//     border-color: rgba(108, 117, 125, 0.4);
-//   }
-// }
+  &.led-active {
+    background: rgba(33, 37, 41, 0.9);
+  }
+}
 
-// // 🆕 Animación para el pad seleccionado
-// .selected-pad-glow {
-//   box-shadow: 0 0 15px rgba(33, 37, 41, 0.3);
-//   border-color: #212529 !important;
-// }
+.activity-indicator {
+  opacity: 0;
+  
+  &.active {
+    opacity: 1;
+  }
+}
 
+// 🎚️ Controles optimizados
+.controls-section {
+  contain: layout;
+  
+  .control-group {
+    contain: layout style;
+  }
+  
+  .control-label {
+    contain: layout;
+  }
+}
 
-// En sampler.component.scss, agregar estilos para el canvas:
-
-// canvas {
-//   background: linear-gradient(135deg, #6e6e6e 0%, #5e5e5e 100%);
-//   border-radius: 6px;
-//   border: 1px solid rgba(108, 117, 125, 0.2);
-//   image-rendering: crisp-edges;
-
-//   &:hover {
-//     border-color: rgba(108, 117, 125, 0.4);
-//     transition: border-color 0.2s ease;
-//   }
-// }
-
-// /* Animación shimmer */
-// @keyframes shimmer {
-//   0% { transform: translateX(-100%); }
-//   100% { transform: translateX(100%); }
-// }
-
-/* Efectos hover súper responsivos */
-button {
+// 🎛️ Sliders ultra-rápidos
+.control-slider {
+  -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
-  transition: all 0.08s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
-  &:active {
-    transform: scale(0.96);
+  
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: rgba(33, 37, 41, 1);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
   }
+  
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: rgba(33, 37, 41, 1);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
+  
+  // ❌ NO hover effects
+}
 
-  &:hover {
-    transform: translateY(-1px);
+// 🔘 Botones optimizados
+.play-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: rgba(33, 37, 41, 1);
+  cursor: pointer;
+  
+  &.active {
+    background: rgba(33, 37, 41, 1);
+    border-color: rgba(33, 37, 41, 1);
+    color: rgba(255, 255, 255, 1);
+  }
+  
+  // ❌ NO hover animations
+  &:active {
+    transform: scale(0.98); // Solo cuando se presiona
   }
 }
 
-/* Efectos de input premium */
-input {
+.seq-btn {
+  background: rgba(173, 181, 189, 0.6);
+  color: rgba(33, 37, 41, 1);
+  cursor: pointer;
+  
+  &.active {
+    background: rgba(33, 37, 41, 0.8);
+    color: rgba(255, 255, 255, 1);
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.effect-btn {
+  background: rgba(173, 181, 189, 0.6);
+  color: rgba(33, 37, 41, 1);
+  cursor: pointer;
+  
+  &.active {
+    background: rgba(33, 37, 41, 1);
+    color: rgba(255, 255, 255, 1);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.action-btn {
+  cursor: pointer;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// 📥 Inputs optimizados
+.input-field {
+  cursor: text;
+  
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
-    border-color: rgba(0, 0, 0, 0.6);
+    border-color: rgba(33, 37, 41, 0.6);
   }
-
+  
   &::placeholder {
-    color: rgba(0, 0, 0, 0.5);
-    font-weight: 400;
+    color: rgba(108, 117, 125, 0.6);
   }
 }
 
-/* File input styles */
-input[type="file"] {
+.file-input {
+  cursor: pointer;
+  
   &::file-selector-button {
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+    background: rgba(33, 37, 41, 0.8);
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -147,20 +208,33 @@ input[type="file"] {
     font-weight: 600;
     cursor: pointer;
     margin-right: 1rem;
-    transition: all 0.08s ease;
-
-    &:hover {
-      background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 1));
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    
+    &:active {
+      background: rgba(33, 37, 41, 1);
     }
   }
 }
 
-/* Responsive para sampler */
+.download-btn {
+  cursor: pointer;
+  
+  &:active {
+    transform: scale(0.98);
+    background: rgba(73, 80, 87, 1);
+  }
+}
+
+// ❌ ELIMINAR TODAS las animaciones keyframes:
+// @keyframes padHit, breathe, pulse, glow, etc.
+
+// 📱 Responsive optimizado
 @media (max-width: 768px) {
-  button {
-    transition: all 0.05s ease;
+  .pad-grid {
+    gap: 0.5rem;
+  }
+  
+  .pad-btn {
+    height: 4rem; // Más pequeño en mobile
   }
 }
 
@@ -169,4 +243,23 @@ input[type="file"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
   }
+  
+  .pad-btn {
+    height: 3.5rem;
+  }
+}
+
+// ⚡ Performance hints
+* {
+  // Optimizar rendering
+  backface-visibility: hidden;
+}
+
+// Will-change solo donde es crítico
+.pad-btn.active {
+  will-change: transform;
+}
+
+.control-slider:active {
+  will-change: transform;
 }

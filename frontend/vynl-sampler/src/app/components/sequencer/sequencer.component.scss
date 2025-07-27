@@ -1,217 +1,789 @@
-// src/app/components/sequencer/sequencer.component.scss
-
+// sequencer.component.scss - PRODUCER EDITION
 .sequencer-container {
   font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
+  contain: layout style paint;
   
-  // ⚡ Solo efectos esenciales
-  .glass {
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+  // Glass effect consistente
+  &.glass-fast {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 }
 
-// 🎚️ Transport Controls - Sin animaciones pesadas
-.transport-header {
-  .play-button {
-    // Solo cambio de color, sin escalas
-    &:active {
-      opacity: 0.8;
-    }
-  }
-
-  .bpm-control input {
-    transition: border-color 0.1s ease;
+// 🎚️ Transport Section Premium
+.transport-section {
+  contain: layout;
+  
+  .play-btn-premium {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.15),    // 👈 BLANCO SUTIL (estado normal)
+      rgba(240, 240, 240, 0.2)      // 👈 BLANCO DEGRADADO
+    );
+    border-color: rgba(255, 255, 255, 0.4);  // 👈 BORDE BLANCO
+    color: rgba(255, 255, 255, 0.8);
     
-    &:focus {
-      background: rgba(255, 255, 255, 0.95);
+    &.playing {
+     background: linear-gradient(135deg, 
+        rgba(244, 67, 54, 0.8),      // 👈 ROJO CUANDO REPRODUCE
+        rgba(211, 47, 47, 0.9)       // 👈 ROJO PROFUNDO
+      );
+      border-color: rgba(244, 67, 54, 1);
+      color: white;
+      box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
     }
-  }
-}
-
-// 🎹 Sequencer Grid - Performance First
-.sequencer-grid {
-  .grid-header {
-    .step-header {
-      // Solo cambio de color para current step
-      &.current-step {
-        background: theme('colors.vynl.carbon');
-        color: theme('colors.vynl.white');
-        border-radius: 4px;
-      }
-    }
-  }
-
-  .track-row {
-    // Transición muy rápida solo en hover
-    transition: background-color 0.1s ease;
     
     &:hover {
-      background: rgba(255, 255, 255, 0.4);
+       transform: scale(1.05);
+      background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.25),   // 👈 HOVER BLANCO MÁS INTENSO
+        rgba(240, 240, 240, 0.3)
+      );
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
     }
+  }
+  
+  .bpm-section, .step-indicator-premium {
+    background: rgba(255, 255, 255, 0.08);   // 👈 FONDO BLANCO SUTIL
+    border-color: rgba(255, 255, 255, 0.2);  // 👈 BORDE BLANCO
     
-    &.selected {
-      background: rgba(33, 37, 41, 0.1);
-      border-left: 4px solid theme('colors.vynl.carbon');
-    }
-    
-    &.muted {
-      opacity: 0.5;
-    }
-    
-    &.solo {
-      border-left: 4px solid #ffd700;
-      background: rgba(255, 215, 0, 0.1);
-    }
-  }
-}
-
-// 🎵 Step Buttons - ULTRA OPTIMIZADO
-.step-button {
-  // ⚡ NO transitions para máximo performance
-  border: 2px solid transparent;
-  cursor: pointer;
-  
-  &.step-inactive {
-    background: rgba(173, 181, 189, 0.2) !important;
-    border-color: rgba(173, 181, 189, 0.3);
-  }
-  
-  &.step-active {
-    border-color: rgba(0, 0, 0, 0.3);
-  }
-  
-  // ⚡ Current playback - Solo cambio de border
-  &.current-playback {
-    border-color: theme('colors.vynl.white') !important;
-    border-width: 3px;
-  }
-  
-  &.step-selected {
-    border-color: theme('colors.vynl.carbon') !important;
-    border-width: 3px;
-  }
-
-  // ⚡ Indicadores visuales minimalistas
-  .velocity-bar {
-    pointer-events: none;
-  }
-  
-  .pan-indicator {
-    pointer-events: none;
-  }
-  
-  .probability-indicator {
-    pointer-events: none;
-  }
-
-  // ⚡ Solo hover suave
-  &:hover {
-    filter: brightness(1.1);
-  }
-}
-
-// 🎚️ Sliders - Optimizados
-.slider {
-  -webkit-appearance: none;
-  appearance: none;
-  background: theme('colors.vynl.slate');
-  outline: none;
-  
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: theme('colors.vynl.carbon');
-    border-radius: 50%;
-    cursor: pointer;
-  }
-  
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: theme('colors.vynl.carbon');
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-  }
-}
-
-// 🎚️ Advanced Controls
-.advanced-panel {
-  .control-group {
     label {
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);       // 👈 LABELS EN BLANCO
     }
-  }
-}
-
-// ⚡ ELIMINADAS - Animaciones pesadas removidas
-// @keyframes pulse, pulse-step, step-pulse, blink
-
-// 🎚️ Grid Layout Helper
-.grid-cols-16 {
-  grid-template-columns: repeat(16, minmax(0, 1fr));
-}
-
-// 📱 Responsive Design - Simplificado
-@media (max-width: 768px) {
-  .sequencer-container {
-    padding: 1rem;
     
-    .track-info {
-      width: 120px;
+    .bpm-input-premium {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.9);       // 👈 TEXTO BLANCO
       
-      .track-name {
-        display: none;
+      &:focus {
+        outline: none;
+        color: rgba(255, 255, 255, 1);       // 👈 BLANCO PURO AL FOCUS
+        text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
       }
     }
     
-    .step-button {
-      width: 1.5rem;
-      height: 1.5rem;
+    .step-display-premium {
+      background: rgba(255, 255, 255, 0.15);  // 👈 FONDO BLANCO
+      color: rgba(0, 0, 0, 0.8);              // 👈 TEXTO NEGRO PARA CONTRASTE
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
     
-    .advanced-panel {
-      .controls-grid {
-        grid-template-columns: 1fr;
+    .bpm-tap-btn {
+      background: rgba(255, 255, 255, 0.1);   // 👈 FONDO BLANCO SUTIL
+      color: rgba(255, 255, 255, 0.7);        // 👈 TEXTO BLANCO
+      transition: all 0.1s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);  // 👈 HOVER BLANCO
+        color: rgba(255, 255, 255, 0.9);
+        transform: scale(1.1);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+        background: rgba(255, 255, 255, 0.3);
       }
     }
   }
+  
+  .swing-control-premium, .humanize-control-premium {
+    background: rgba(255, 255, 255, 0.08);   // 👈 FONDO BLANCO SUTIL
+    border-color: rgba(255, 255, 255, 0.2);  // 👈 BORDE BLANCO
+    
+    label {
+      color: rgba(255, 255, 255, 0.7);       // 👈 LABELS EN BLANCO
+    }
+    
+    span {
+      color: rgba(255, 255, 255, 0.8);       // 👈 VALORES EN BLANCO
+    }
+    
+    .swing-slider, .humanize-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);  // 👈 TRACK BLANCO
+      
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.9),          // 👈 THUMB BLANCO
+          rgba(240, 240, 240, 1)
+        );
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid rgba(0, 0, 0, 0.2); // 👈 BORDE NEGRO SUTIL
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+      
+      &::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.9),
+          rgba(240, 240, 240, 1)
+        );
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+  
+  .advanced-btn {
+    background: rgba(255, 255, 255, 0.1);    // 👈 FONDO BLANCO SUTIL
+    border-color: rgba(255, 255, 255, 0.3);  // 👈 BORDE BLANCO
+    color: rgba(255, 255, 255, 0.8);         // 👈 TEXTO BLANCO
+    
+    &.active {
+      background: rgba(255, 255, 255, 0.2);  // 👈 ACTIVO BLANCO MÁS INTENSO
+      border-color: rgba(255, 255, 255, 0.5);
+      color: rgba(255, 255, 255, 1);         // 👈 TEXTO BLANCO PURO
+      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+    }
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);  // 👈 HOVER BLANCO
+      border-color: rgba(255, 255, 255, 0.4);
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+}
+
+
+// 🎹 Sequencer Main Premium - OPTIMIZADO SIN LAG
+.sequencer-main {
+  contain: layout;
+  
+  .steps-header {
+    contain: layout; // ⚡ OPTIMIZACIÓN ADICIONAL
+    
+    .step-number {
+      // ❌ REMOVIDO: transition (causa lag)
+      // transition: all 0.1s ease; 
+      
+      contain: layout style; // ⚡ OPTIMIZACIÓN DE RENDERING
+      will-change: background-color; // ⚡ SOLO CAMBIAR BACKGROUND
+      
+      &.current-step-header {
+        background: linear-gradient(135deg, 
+          rgba(244, 67, 54, 0.9),      // 👈 ROJO CONSISTENTE
+          rgba(211, 47, 47, 1)         // 👈 ROJO PROFUNDO
+        );
+        color: white;
+        // ❌ REMOVIDO: transform: scale(1.1); (causa lag y jank)
+        box-shadow: 0 0 8px rgba(244, 67, 54, 0.4); // 👈 SOMBRA MÁS SUTIL
+        border-radius: 4px; // ⚡ AGREGAR BORDER RADIUS DIRECTO
+      }
+      
+      &.beat-strong {
+        background: rgba(255, 255, 255, 0.2);  // 👈 BLANCO SUTIL (beats fuertes)
+        color: rgba(0, 0, 0, 0.8);             // 👈 TEXTO NEGRO PARA CONTRASTE
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.3); // 👈 BORDE PARA DEFINICIÓN
+      }
+      
+      &.beat-weak {
+        background: rgba(180, 180, 180, 0.15); // 👈 GRIS SUTIL (beats débiles)
+        color: rgba(0, 0, 0, 0.6);             // 👈 TEXTO GRIS OSCURO
+        border: 1px solid rgba(180, 180, 180, 0.2);
+      }
+    }
+  }
+  
+  .tracks-container {
+    contain: layout style; // ⚡ OPTIMIZACIÓN ADICIONAL
+    
+    .track-row-premium {
+      contain: layout;
+      cursor: pointer;
+      // ❌ TRANSITION MÁS RÁPIDA PARA MENOS LAG
+      transition: background-color 0.05s ease; // ⚡ SOLO BACKGROUND, MÁS RÁPIDO
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);  // 👈 HOVER BLANCO SUTIL
+      }
+      
+      &.selected {
+        background: rgba(255, 255, 255, 0.08);  // 👈 SELECCIÓN BLANCA
+        border-left: 4px solid rgba(255, 255, 255, 0.7); // 👈 BORDE BLANCO
+      }
+      
+      &.muted {
+        opacity: 0.25;                          // 👈 MÁS TRANSPARENTE
+        filter: grayscale(1) brightness(0.7);   // 👈 GRIS COMPLETO + OSCURO
+        pointer-events: none;                   // ⚡ DESACTIVAR INTERACCIÓN
+      }
+      
+      &.solo {
+        border-left: 4px solid rgba(255, 140, 0, 0.9);   // 👈 NARANJA CONSISTENTE
+        background: rgba(255, 140, 0, 0.08);             // 👈 FONDO NARANJA SUTIL
+        box-shadow: inset 0 0 10px rgba(255, 140, 0, 0.1); // ⚡ GLOW INTERNO
+      }
+      
+      &.has-audio {
+        border-left: 3px solid rgba(255, 255, 255, 0.8); // 👈 BORDE BLANCO PARA SAMPLES
+        
+        .sample-name.has-sample {
+          color: rgba(255, 255, 255, 0.95);              // 👈 BLANCO PURO
+          font-weight: 700;
+          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);     // 👈 SOMBRA PARA CONTRASTE
+        }
+      }
+      
+      // ⚡ ESTADOS COMBINADOS PARA MEJOR PERFORMANCE
+      &.has-audio.selected {
+        border-left: 4px solid rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.12);
+      }
+      
+      &.has-audio.solo {
+        border-left: 4px solid rgba(255, 140, 0, 1);
+        background: rgba(255, 140, 0, 0.1);
+      }
+    }
+  }
+}
+
+// ⚡ OPTIMIZACIONES ESPECÍFICAS PARA CURRENT STEP
+.step-number {
+  // ⚡ FORZAR COMPOSITING LAYER SOLO PARA CURRENT STEP
+  &.current-step-header {
+    transform: translateZ(0); // ⚡ FORZAR GPU LAYER SIN SCALE
+    will-change: background-color, box-shadow; // ⚡ SOLO LO QUE CAMBIA
+  }
+  
+  // ❌ REMOVER WILL-CHANGE DE ELEMENTOS QUE NO LO NECESITAN
+  &:not(.current-step-header) {
+    will-change: auto;
+  }
+}
+
+// ⚡ OPTIMIZACIÓN GLOBAL PARA SEQUENCER
+.sequencer-main {
+  // Evitar reflows durante playback
+  transform: translateZ(0);
+  
+  // Optimizar scroll container
+  .tracks-container {
+    // ⚡ SCROLLING OPTIMIZADO
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: auto; // ❌ NO SMOOTH (causa lag)
+  }
+}
+
+// 📱 RESPONSIVE OPTIMIZADO (SIN LAG EN MÓVILES)
+@media (max-width: 768px) {
+  .step-number {
+    // ❌ REMOVER TODAS LAS TRANSICIONES EN MÓVIL
+    transition: none !important;
+    
+    &.current-step-header {
+      // ⚡ EFECTO MÁS SIMPLE EN MÓVIL
+      background: rgba(244, 67, 54, 0.9);
+      box-shadow: none; // ❌ SIN SOMBRA EN MÓVIL
+    }
+  }
+  
+  .track-row-premium {
+    transition: none !important; // ❌ SIN TRANSICIONES EN MÓVIL
+  }
+}
+
+// ⚡ CRÍTICO: PREVENIR LAG DURANTE PLAYBACK
+@media (prefers-reduced-motion: reduce) {
+  .step-number,
+  .track-row-premium {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+
+
+
+
+
+
+
+
+// 🎵 Track Info Premium
+.track-info-premium {
+  contain: layout;
+  
+  .sample-section {
+    .pad-number {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sample-details {
+      .status-dot {
+        animation: pulse 2s infinite;
+      }
+    }
+  }
+  
+  .track-controls {
+    .control-btn-mini {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(108, 117, 125, 1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      
+      &.active {
+        background: rgba(33, 37, 41, 1);
+        color: white;
+        box-shadow: 0 2px 8px rgba(33, 37, 41, 0.3);
+      }
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      
+      &:active {
+        transform: scale(0.9);
+      }
+    }
+  }
+}
+
+
+
+.steps-section {
+  contain: layout;
+  background: rgba(43, 38, 38, 0.47); // Tu fondo actual
+  border-radius: 8px;
+  
+  .step-btn-premium {
+    contain: layout style;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    
+    // 🎨 Patrón FL Studio - BLANCOS más contrastados
+    &:nth-child(1), &:nth-child(2), &:nth-child(3), &:nth-child(4),
+    &:nth-child(9), &:nth-child(10), &:nth-child(11), &:nth-child(12) {
+      background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.6),    // 👈 MÁS BLANCO (beats fuertes)
+        rgba(240, 240, 240, 0.7)     // 👈 BLANCO PURO
+      );
+      border-color: rgba(255, 255, 255, 0.5); // Borde más visible
+      box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    &:nth-child(5), &:nth-child(6), &:nth-child(7), &:nth-child(8),
+    &:nth-child(13), &:nth-child(14), &:nth-child(15), &:nth-child(16) {
+      background: linear-gradient(135deg, 
+        rgba(180, 180, 180, 0.4),    // 👈 GRIS MEDIO (beats débiles)
+        rgba(160, 160, 160, 0.5)     // 👈 GRIS OSCURO
+      );
+      border-color: rgba(200, 200, 200, 0.4);
+      box-shadow: 
+        inset 0 1px 2px rgba(0, 0, 0, 0.1),
+        0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+    
+    // 🎯 Estados activos - BLANCO/GRIS elegante
+    &.step-active {
+      &:nth-child(1), &:nth-child(2), &:nth-child(3), &:nth-child(4),
+      &:nth-child(9), &:nth-child(10), &:nth-child(11), &:nth-child(12) {
+        background: linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.9),   // 👈 BLANCO ACTIVO BRILLANTE
+          rgba(240, 240, 240, 0.95)   // 👈 BLANCO PURO ACTIVO
+        );
+        border-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 
+          0 2px 8px rgba(255, 255, 255, 0.3),
+          inset 0 1px 2px rgba(255, 255, 255, 0.4);
+      }
+      
+      &:nth-child(5), &:nth-child(6), &:nth-child(7), &:nth-child(8),
+      &:nth-child(13), &:nth-child(14), &:nth-child(15), &:nth-child(16) {
+        background: linear-gradient(135deg, 
+          rgba(220, 220, 220, 0.8),   // 👈 GRIS CLARO ACTIVO
+          rgba(200, 200, 200, 0.9)    // 👈 GRIS MEDIO ACTIVO
+        );
+        border-color: rgba(220, 220, 220, 0.7);
+        box-shadow: 
+          0 2px 8px rgba(200, 200, 200, 0.3),
+          inset 0 1px 2px rgba(255, 255, 255, 0.2);
+      }
+    }
+    
+    // 🔴 Current playback - ROJO SUTIL (más elegante que amarillo)
+    &.current-playback {
+      background: linear-gradient(135deg, 
+        rgba(244, 67, 54, 0.8),      // 👈 ROJO ELEGANTE
+        rgba(211, 47, 47, 0.9)       // 👈 ROJO PROFUNDO
+      ) !important;
+      border-color: rgba(244, 67, 54, 0.9) !important;
+      border-width: 2px;
+      box-shadow: 
+        0 0 15px rgba(244, 67, 54, 0.4),
+        0 2px 8px rgba(244, 67, 54, 0.2) !important;
+      transform: scale(1.05);
+      z-index: 10;
+    }
+    
+    // 🔵 Step seleccionado - AZUL SUTIL
+    &.step-selected {
+      border-color: rgba(100, 149, 237, 0.8) !important; // 👈 AZUL CORNFLOWER MÁS SUTIL
+      border-width: 2px;
+      box-shadow: 
+        0 0 10px rgba(100, 149, 237, 0.3),
+        inset 0 0 5px rgba(100, 149, 237, 0.1);
+      z-index: 5;
+    }
+    
+    // 🎯 Hover states
+    &:hover {
+      filter: brightness(1.15);
+      transform: scale(1.02);
+      border-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.1),
+        inset 0 1px 3px rgba(255, 255, 255, 0.4);
+    }
+    
+    &:active {
+      transform: scale(0.98);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+    
+    // 🎵 Step Content
+    .step-content {
+      .velocity-bar {
+        contain: layout;
+        pointer-events: none;
+        transition: height 0.1s ease;
+        
+        // Velocity bars en tonos grises/blancos
+        .step-btn-premium:nth-child(1) &, 
+        .step-btn-premium:nth-child(2) &, 
+        .step-btn-premium:nth-child(3) &, 
+        .step-btn-premium:nth-child(4) &,
+        .step-btn-premium:nth-child(9) &, 
+        .step-btn-premium:nth-child(10) &, 
+        .step-btn-premium:nth-child(11) &, 
+        .step-btn-premium:nth-child(12) & {
+          background: linear-gradient(to top,
+            rgba(0, 0, 0, 0.3),        // 👈 NEGRO SUTIL ABAJO
+            rgba(0, 0, 0, 0.1)         // 👈 TRANSPARENTE ARRIBA
+          );
+        }
+        
+        .step-btn-premium:nth-child(5) &, 
+        .step-btn-premium:nth-child(6) &, 
+        .step-btn-premium:nth-child(7) &, 
+        .step-btn-premium:nth-child(8) &,
+        .step-btn-premium:nth-child(13) &, 
+        .step-btn-premium:nth-child(14) &, 
+        .step-btn-premium:nth-child(15) &, 
+        .step-btn-premium:nth-child(16) & {
+          background: linear-gradient(to top,
+            rgba(255, 255, 255, 0.4),  // 👈 BLANCO SUTIL ABAJO
+            rgba(255, 255, 255, 0.2)   // 👈 BLANCO TRANSPARENTE ARRIBA
+          );
+        }
+      }
+      
+      .active-overlay {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        pointer-events: none;
+      }
+      
+      .step-number {
+        color: rgba(0, 0, 0, 0.7);     // 👈 NEGRO PARA CONTRASTE
+        font-size: 8px;
+        line-height: 1;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+      }
+      
+      .probability-indicator {
+        background: linear-gradient(135deg, 
+          rgba(255, 140, 0, 0.8),      // 👈 NARANJA SUTIL
+          rgba(255, 111, 0, 0.9)       // 👈 NARANJA PROFUNDO
+        );
+        box-shadow: 0 1px 3px rgba(255, 140, 0, 0.4);
+        animation: probability-pulse 2s infinite;
+      }
+      
+      .pan-indicator {
+        background: linear-gradient(135deg, 
+          rgba(100, 149, 237, 0.7),    // 👈 AZUL CORNFLOWER SUTIL
+          rgba(72, 118, 255, 0.8)      // 👈 AZUL PROFUNDO
+        );
+        box-shadow: 0 1px 2px rgba(100, 149, 237, 0.4);
+      }
+    }
+  }
+}
+
+
+// 🎚️ Advanced Controls Premium
+.advanced-controls-premium {
+  contain: layout;
+  
+  .advanced-header {
+    .close-btn {
+      transition: all 0.1s ease;
+      
+      &:hover {
+        background: rgba(173, 181, 189, 0.6);
+        transform: scale(1.1);
+      }
+    }
+  }
+  
+  .controls-grid {
+    .control-section {
+      .control-wrapper {
+        transition: all 0.2s ease;
+        
+        &:hover {
+          border-color: rgba(255, 255, 255, 0.4);
+          background: rgba(255, 255, 255, 0.08);
+        }
+      }
+      
+      .premium-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        cursor: pointer;
+        
+        &::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          background: linear-gradient(135deg, rgba(33, 37, 41, 0.9), rgba(33, 37, 41, 1));
+          border-radius: 50%;
+          cursor: pointer;
+          border: 3px solid rgba(255, 255, 255, 0.4);
+          box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        &::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          background: linear-gradient(135deg, rgba(33, 37, 41, 0.9), rgba(33, 37, 41, 1));
+          border-radius: 50%;
+          cursor: pointer;
+         border: 3px solid rgba(255, 255, 255, 0.4);
+         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+       }
+     }
+     
+     .value-display {
+       background: rgba(255, 255, 255, 0.1);
+       border-radius: 6px;
+       padding: 4px 8px;
+       border: 1px solid rgba(255, 255, 255, 0.2);
+     }
+   }
+ }
+ 
+ .advanced-options {
+   .option-control {
+     transition: all 0.2s ease;
+     
+     &:hover {
+       border-color: rgba(255, 255, 255, 0.4);
+       background: rgba(255, 255, 255, 0.08);
+     }
+     
+     input[type="checkbox"] {
+       cursor: pointer;
+       transition: all 0.1s ease;
+       
+       &:checked {
+         background: rgba(33, 37, 41, 0.9);
+         border-color: rgba(33, 37, 41, 1);
+       }
+     }
+     
+     .premium-slider {
+       -webkit-appearance: none;
+       appearance: none;
+       cursor: pointer;
+       
+       &::-webkit-slider-thumb {
+         -webkit-appearance: none;
+         appearance: none;
+         width: 16px;
+         height: 16px;
+         background: rgba(33, 37, 41, 1);
+         border-radius: 50%;
+         cursor: pointer;
+         border: 2px solid rgba(255, 255, 255, 0.3);
+       }
+       
+       &::-moz-range-thumb {
+         width: 16px;
+         height: 16px;
+         background: rgba(33, 37, 41, 1);
+         border-radius: 50%;
+         cursor: pointer;
+         border: 2px solid rgba(255, 255, 255, 0.3);
+       }
+     }
+   }
+ }
+}
+
+// 🎚️ Grid layout helper
+.grid-cols-16 {
+ grid-template-columns: repeat(16, minmax(0, 1fr));
+}
+
+// 📱 Responsive Premium
+@media (max-width: 1024px) {
+ .transport-section {
+   .transport-main {
+     flex-wrap: wrap;
+     gap: 3rem;
+   }
+   
+   .global-controls-section {
+     flex-wrap: wrap;
+     gap: 2rem;
+   }
+ }
+ 
+ .advanced-controls-premium {
+   .controls-grid {
+     grid-template-columns: 1fr 1fr;
+     gap: 1rem;
+   }
+ }
+}
+
+@media (max-width: 768px) {
+ .sequencer-container {
+   padding: 1rem;
+ }
+ 
+ .transport-section {
+   .transport-main, .global-controls-section {
+     flex-direction: column;
+     align-items: stretch;
+     gap: 1rem;
+   }
+   
+   .play-btn-premium {
+     width: 100%;
+     height: 3rem;
+   }
+ }
+ 
+ .track-info-premium {
+   width: 140px;
+   
+   .sample-details .sample-name {
+     font-size: 0.75rem;
+   }
+ }
+ 
+ // 🎯 Mejoras específicas para cada tipo de beat
+.step-btn-premium {
+  // Beats principales (1, 5, 9, 13) - Extra emphasis
+  &:nth-child(1), &:nth-child(5), &:nth-child(9), &:nth-child(13) {
+    &::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.3), 
+        rgba(255, 255, 255, 0.1)
+      );
+      border-radius: 6px;
+      z-index: -1;
+    }
+  }
+  
+  // Snare beats (5, 13) - Extra visual weight
+  &:nth-child(5), &:nth-child(13) {
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 1px;
+    }
+  }
+}
+ 
+ .advanced-controls-premium {
+   .controls-grid {
+     grid-template-columns: 1fr;
+     gap: 1rem;
+   }
+   
+   .advanced-options {
+     flex-direction: column;
+     align-items: stretch;
+     gap: 1rem;
+   }
+ }
 }
 
 @media (max-width: 480px) {
-  .grid-cols-16 {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-  }
-  
-  .track-info {
-    width: 80px;
-    padding: 0.5rem;
-  }
-  
-  .step-button {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
+ .grid-cols-16 {
+   grid-template-columns: repeat(8, minmax(0, 1fr));
+ }
+ 
+ .track-info-premium {
+   width: 100px;
+   
+   .sample-details .sample-name {
+     display: none;
+   }
+ }
+ 
+ .step-btn-premium {
+   width: 1.25rem;
+   height: 1.75rem;
+ }
 }
 
-// ⚡ Performance Optimizations
+// ⚡ Performance optimizations
 * {
-  // Optimizar rendering
-  backface-visibility: hidden;
-  perspective: 1000px;
+ backface-visibility: hidden;
 }
 
-// Will-change solo en elementos que realmente cambian
-.step-button.current-playback {
-  will-change: border-color;
+// Will-change solo donde es crítico
+.step-btn-premium.current-playback {
+ will-change: transform, border-color, box-shadow;
 }
 
-.current-step {
-  will-change: background-color;
+.current-step-header {
+ will-change: transform, background-color;
 }
+
+.play-btn-premium.playing {
+ will-change: background, box-shadow;
+}
+
+// 🎨 Animations
+@keyframes pulse {
+ 0%, 100% { 
+   opacity: 1; 
+ }
+ 50% { 
+   opacity: 0.6; 
+ }
+}
+

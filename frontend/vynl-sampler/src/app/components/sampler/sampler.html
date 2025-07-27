@@ -1,297 +1,239 @@
+<!-- sampler.html - PERFORMANCE EDITION -->
 <div class="min-h-screen text-vynl-carbon relative overflow-hidden">
 
-  <!-- Background image -->
+  <!-- Background optimizado -->
   <div class="fixed inset-0 z-0">
     <img
       src="https://images.unsplash.com/photo-1687627671714-86d03b4e15ab?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-      alt="Fondo dramático de nubes" class="w-full h-full object-cover">
-
-    <!-- Overlay para glass effect -->
-    <div class="absolute inset-0 bg-white/5 backdrop-blur-[0.5px]"></div>
+      alt="Fondo dramático de nubes" 
+      class="w-full h-full object-cover"
+      loading="lazy">
+    <div class="absolute inset-0 bg-white/5"></div>
   </div>
 
   <div class="relative z-10 p-6">
-    <div
-      class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-4 md:p-6 mb-6 shadow-soft hover:shadow-crisp transition-all duration-300">
+    <!-- Header simplificado -->
+    <div class="glass-fast border border-white/20 rounded-2xl p-4 md:p-6 mb-6">
 
-      <!-- Layout Responsive: Stack en mobile, flex en desktop -->
       <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
 
-        <!-- 🎵 Sección del Logo y Tagline -->
+        <!-- Logo y Tagline -->
         <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-
-          <!-- Logo Principal -->
           <div class="flex flex-col items-start">
-            <h1
-              class="text-3xl sm:text-4xl xl:text-5xl font-bold text-vynl-black font-mono tracking-wider text-shadow leading-none">
+            <h1 class="text-3xl sm:text-4xl xl:text-5xl font-bold text-vynl-black font-mono tracking-wider leading-none">
               VYNL
             </h1>
-            <!-- Tagline responsivo: abajo en mobile, al lado en desktop -->
-            <span class="text-vynl-white text-xs sm:text-sm font-medium tracking-wide text-shadow mt-1 sm:mt-0 
-                     opacity-90 lg:hidden">
+            <span class="text-vynl-white text-xs sm:text-sm font-medium tracking-wide mt-1 sm:mt-0 opacity-90 lg:hidden">
               Samplea lo Underground
             </span>
           </div>
-
-          <!-- Tagline para desktop (hidden en mobile) -->
-          <span class="hidden lg:block text-vynl-white text-sm xl:text-base font-medium tracking-wide text-shadow
-                   opacity-90 border-l border-vynl-slate/40 pl-4">
+          <span class="hidden lg:block text-vynl-white text-sm xl:text-base font-medium tracking-wide opacity-90 border-l border-vynl-slate/40 pl-4">
             Samplea lo Underground
           </span>
-
         </div>
 
-        <!-- 🎚️ Controles de Transporte -->
+        <!-- Controles de Transporte optimizados -->
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 lg:gap-6">
 
-          <!-- Control de BPM (arriba en mobile) -->
+          <!-- Control de BPM -->
           <div class="order-2 sm:order-1">
-            <div class="glass backdrop-blur-sm rounded-xl p-3 border border-white/30 text-center
-                    hover:border-white/50 transition-all duration-200 group">
-              <div class="text-vynl-charcoal text-xs font-medium tracking-wide mb-1 
-                      group-hover:text-vynl-graphite transition-colors">BPM</div>
-              <div class="text-xl sm:text-2xl font-bold text-vynl-carbon group-hover:text-vynl-black transition-colors">
-                {{ bpm() }}
-              </div>
+            <div class="glass-fast rounded-xl p-3 border border-white/30 text-center">
+              <div class="text-vynl-charcoal text-xs font-medium tracking-wide mb-1">BPM</div>
+              <div class="text-xl sm:text-2xl font-bold text-vynl-carbon">{{ bpm() }}</div>
             </div>
           </div>
 
-          <!-- Botón Play/Stop Principal -->
+          <!-- Botón Play/Stop optimizado -->
           <div class="order-1 sm:order-2">
-            <button (click)="togglePlay()" [class]="isPlaying() ?
-            'bg-vynl-carbon text-vynl-white shadow-crisp border-vynl-carbon hover:bg-vynl-iron' :
-            'bg-white/20 border-white/40 text-vynl-carbon hover:bg-white/30 hover:border-white/60'" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3 rounded-xl font-bold 
-                 transition-all duration-200 backdrop-blur-sm border shadow-soft 
-                 transform active:scale-96 hover:scale-105 text-sm sm:text-base
-                 flex items-center justify-center gap-2 group">
-
-              <!-- Icono de Play/Pause -->
+            <button (click)="togglePlay()" 
+                    class="play-btn w-full sm:w-auto px-6 sm:px-8 py-3 rounded-xl font-bold border flex items-center justify-center gap-2"
+                    [class.active]="isPlaying()">
               <span class="text-lg" [innerHTML]="isPlaying() ? '⏸' : '▶'"></span>
               <span class="tracking-wide">{{ isPlaying() ? 'PARAR' : 'PLAY' }}</span>
             </button>
           </div>
 
-          <!-- Toggle Sequencer -->
-          <button (click)="toggleSequencer()"
-                  class="px-4 py-3 bg-vynl-steel/60 text-vynl-carbon rounded-xl font-bold transition-all duration-100 border border-vynl-slate/40">
+          <!-- Toggle Sequencer optimizado -->
+          <button (click)="toggleSequencer()" 
+                  class="seq-btn px-4 py-3 rounded-xl font-bold border border-vynl-slate/40"
+                  [class.active]="showSequencer()">
             {{ showSequencer() ? 'HIDE SEQ' : 'SHOW SEQ' }}
           </button>
 
         </div>
       </div>
 
-
-      <!-- 🎵 Información Adicional (Solo Desktop) -->
+      <!-- Info adicional simplificada -->
       <div class="hidden xl:flex items-center justify-between mt-4 pt-4 border-t border-white/20">
-
-        <!-- Info del Estado -->
         <div class="flex items-center gap-6 text-xs text-vynl-slate/80">
           <div class="flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse" *ngIf="audioService.isInitialized"></div>
+            <div class="w-2 h-2 rounded-full bg-green-400" *ngIf="audioService.isInitialized"></div>
             <span>Audio Engine Ready</span>
           </div>
-
-          <div class="flex items-center gap-2">
-            <span>{{ loadedPadsCount() }}/16 Pads Loaded</span>
-          </div>
-
-          <div class="flex items-center gap-2" *ngIf="selectedPad() !== null">
-            <span>Pad {{ selectedPad()! + 1 }} Selected</span>
-          </div>
+          <span>{{ loadedPadsCount() }}/16 Pads Loaded</span>
+          <span *ngIf="selectedPad() !== null">Pad {{ selectedPad()! + 1 }} Selected</span>
         </div>
-
-        <!-- Quick Actions -->
         <div class="flex items-center gap-2">
-          <button class="px-3 py-1 text-xs bg-vynl-slate/20 hover:bg-vynl-slate/30 
-                     rounded-lg transition-colors border border-vynl-slate/30" title="Panic - Stop All">
-            ESC
-          </button>
-          <button class="px-3 py-1 text-xs bg-vynl-slate/20 hover:bg-vynl-slate/30 
-                     rounded-lg transition-colors border border-vynl-slate/30" title="Play/Pause">
-            SPACE
-          </button>
+          <span class="px-3 py-1 text-xs bg-vynl-slate/20 rounded-lg border border-vynl-slate/30">ESC</span>
+          <span class="px-3 py-1 text-xs bg-vynl-slate/20 rounded-lg border border-vynl-slate/30">SPACE</span>
         </div>
       </div>
 
     </div>
 
+    <!-- Sequencer optimizado -->
     @if (showSequencer()) {
-  <div class="sequencer-section mb-10 mt-6 px-1">
-    <!-- Título opcional para el sequencer -->
-    <div class="text-center mb-4">
-      <h2 class="text-vynl-carbon text-lg font-bold tracking-wide opacity-75">
-        SECUENCIADOR ACTIVO
-      </h2>
-    </div>
-    <app-sequencer></app-sequencer>
-  </div>
-}
+      <div class="sequencer-section mb-10 mt-6 px-1">
+        <div class="text-center mb-4">
+          <h2 class="text-vynl-steel text-lg font-bold tracking-wide opacity-75">SECUENCIADOR ACTIVO</h2>
+        </div>
+        <app-sequencer></app-sequencer>
+      </div>
+    }
 
-    <!-- 🆕 NUEVO: Layout Principal con 2 Columnas -->
+    <!-- Layout principal optimizado -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-      <!-- 🎛️ Columna Izquierda: Pads del Sampler (2/3 del ancho) -->
+      <!-- Pads del Sampler optimizados -->
       <div class="xl:col-span-2">
-        <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-soft">
-          <h2 class="text-vynl-silver text-xl font-bold mb-6 tracking-wide text-shadow">PADS DEL SAMPLER</h2>
+        <div class="glass-fast border border-white/20 rounded-2xl p-6">
+          <h2 class="text-vynl-silver text-xl font-bold mb-6 tracking-wide">PADS DEL SAMPLER</h2>
 
-          <div class="grid grid-cols-4 gap-3">
-            @for (pad of pads(); track pad.id) {
-            <div class="relative group">
-              <button (mousedown)="playPad(pad.id)" (touchstart)="playPad(pad.id)" (click)="selectPad(pad.id)" class="w-full h-20 bg-white/10 backdrop-blur-sm border border-white/30 rounded-lg
-                         hover:bg-white/20 active:bg-vynl-charcoal/10
-                         transition-all duration-80 transform active:scale-96
-                         shadow-soft hover:shadow-crisp relative overflow-hidden group">
+          <!-- En la línea 103 aproximadamente, cambiar: -->
+<div class="grid grid-cols-4 gap-3 pad-grid">
+  @for (pad of pads(); track trackByPadId($index, pad)) {
+    <div class="pad-container">
+      <button 
+        (mousedown)="playPad(pad.id)" 
+        (touchstart)="playPad(pad.id)" 
+        (click)="selectPad(pad.id)"
+        class="pad-btn w-full h-20 border rounded-lg relative overflow-hidden"
+        [class.loaded]="pad.isLoaded"
+        [class.active]="pad.isActive"
+        [class.selected]="selectedPad() === pad.id">
 
-                <!-- LED Indicator minimalista -->
-                <div class="absolute top-2 right-2 w-2 h-2 rounded-full border border-white/50" [class]="pad.isActive ?
-                         'bg-vynl-carbon shadow-crisp animate-pulse-fast' :
-                         'bg-vynl-slate/60'">
-                </div>
+        <!-- LED Indicator optimizado -->
+        <div class="led-indicator absolute top-2 right-2 w-2 h-2 rounded-full border border-white/50"
+             [class.led-active]="pad.isActive">
+        </div>
 
-                <!-- Número del Pad -->
-                <div class="absolute top-2 left-2 text-xs font-mono text-vynl-charcoal font-medium">
-                  {{ pad.id + 1 }}
-                </div>
+        <!-- Número del Pad -->
+        <div class="absolute top-2 left-2 text-xs font-mono text-vynl-charcoal font-medium">
+          {{ pad.id + 1 }}
+        </div>
 
-                <!--  Indicador de Pad Seleccionado -->
-                <div *ngIf="selectedPad() === pad.id" class="absolute inset-0 border-2 border-vynl-carbon rounded-lg pointer-events-none
-              shadow-[0_0_10px_rgba(33,37,41,0.5)] animate-pulse">
-                </div>
-
-                <!-- Nombre del Sample -->
-                <div class="flex items-end justify-center h-full pb-2">
-                  <div class="text-xs font-medium text-vynl-carbon/90 truncate px-2 text-center">
-                    {{ pad.sampleName }}
-                  </div>
-                </div>
-              </button>
-            </div>
-            }
+        <!-- Nombre del Sample -->
+        <div class="flex items-end justify-center h-full pb-2">
+          <div class="text-xs font-medium text-vynl-carbon/90 truncate px-2 text-center">
+            {{ pad.sampleName }}
           </div>
+        </div>
+      </button>
+    </div>
+  }
+</div>
         </div>
       </div>
 
-
-
-
-      <!-- 🎵 Columna Derecha: Panel de Controles (1/3 del ancho) -->
+      <!-- Panel de Controles optimizado -->
       <div class="xl:col-span-1">
-        <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-soft h-full">
-          <h3 class="text-vynl-carbon text-lg font-bold mb-4 tracking-wide text-shadow">
+        <div class="glass-fast border border-white/20 rounded-2xl p-6 h-full">
+          <h3 class="text-vynl-carbon text-lg font-bold mb-4 tracking-wide">
             CONTROLES {{ selectedPad() !== null ? 'PAD ' + (selectedPad()! + 1) : 'MASTER' }}
           </h3>
 
-          <!-- 🆕 Waveform Principal Mejorado -->
-          <!-- Versión alternativa más minimalista -->
+          <!-- Waveform optimizado -->
           <div class="mb-6">
-            <div class="bg-gradient-to-br from-vynl-carbon/10 to-vynl-carbon/30 
-              backdrop-blur-xl rounded-2xl p-5 border border-vynl-slate/30 
-              shadow-soft hover:shadow-crisp transition-all duration-300 
-              hover:bg-gradient-to-br hover:from-vynl-carbon/15 hover:to-vynl-carbon/35">
-
+            <div class="waveform-container bg-gradient-to-br from-vynl-carbon/10 to-vynl-carbon/30 rounded-2xl p-5 border border-vynl-slate/30">
               <div class="text-center text-vynl-white text-xs font-bold mb-4 tracking-widest opacity-90">
                 {{ selectedPad() !== null ? 'WAVEFORM · PAD ' + (selectedPad()! + 1) : 'SELECCIONA UN PAD' }}
               </div>
 
-              <div class="relative w-full aspect-[5/1] bg-vynl-carbon/50 rounded-xl border border-vynl-graphite/40 
-                overflow-hidden shadow-inner">
-                <canvas #waveformCanvas width="400" height="80" class="absolute inset-0 w-full h-full canvas-waveform">
+              <div class="relative w-full aspect-[5/1] bg-vynl-carbon/50 rounded-xl border border-vynl-graphite/40 overflow-hidden">
+                <canvas #waveformCanvas width="400" height="80" class="canvas-waveform absolute inset-0 w-full h-full">
                 </canvas>
-
-                <!-- Overlay sutil -->
-                <div class="absolute inset-0 bg-gradient-to-t from-vynl-carbon/20 to-transparent 
-                  pointer-events-none"></div>
-
-                <!-- Indicador de actividad -->
-                <div class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-vynl-white/60 
-                  opacity-0 transition-opacity duration-300"
-                  [class.opacity-100]="selectedPad() !== null && pads()[selectedPad()!].isLoaded">
+                <div class="absolute inset-0 bg-gradient-to-t from-vynl-carbon/20 to-transparent pointer-events-none"></div>
+                <div class="activity-indicator absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-vynl-white/60"
+                     [class.active]="selectedPad() !== null && pads()[selectedPad()!].isLoaded">
                 </div>
               </div>
 
               <div class="mt-3 text-center" *ngIf="selectedPad() !== null">
                 <div class="text-xs text-vynl-slate/80 font-medium truncate">
-                  {{ pads()[selectedPad()!].isLoaded ? pads()[selectedPad()!].sampleName : 'Arrastra un archivo de
-                  audio' }}
+                  {{ pads()[selectedPad()!].isLoaded ? pads()[selectedPad()!].sampleName : 'Arrastra un archivo de audio' }}
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 🆕 Controles de Audio -->
-          <div class="space-y-6" *ngIf="selectedPad() !== null">
+          <!-- Controles de Audio optimizados -->
+          <div class="controls-section space-y-6" *ngIf="selectedPad() !== null">
 
             <!-- Control de Volumen -->
-            <div>
-              <label class="block text-sm font-bold text-vynl-carbon mb-3 tracking-wide">VOLUMEN</label>
+            <div class="control-group">
+              <label class="control-label block text-sm font-bold text-vynl-carbon mb-3 tracking-wide">VOLUMEN</label>
               <div class="flex items-center space-x-3">
-                <span class="text-xs text-vynl-charcoal font-medium">0</span>
-                <input type="range" [value]="currentPadVolume()" (input)="setPadVolume($event)" min="0" max="100"
-                  step="1" class="flex-1 h-3 bg-vynl-slate/20 rounded-lg appearance-none cursor-pointer
-                              slider-thumb:bg-vynl-carbon slider-thumb:rounded-full
-                              hover:bg-vynl-slate/30 transition-all duration-100">
-                <span class="text-xs text-vynl-charcoal font-medium">100</span>
-                <div class="text-sm font-bold text-vynl-carbon min-w-[3rem]
-                           bg-vynl-cloud/80 px-2 py-1 rounded border border-vynl-steel">
+                <span class="control-min text-xs text-vynl-charcoal font-medium">0</span>
+                <input type="range" 
+                       [value]="currentPadVolume()" 
+                       (input)="setPadVolume($event)" 
+                       min="0" max="100" step="1"
+                       class="control-slider flex-1 h-3 bg-vynl-slate/20 rounded-lg">
+                <span class="control-max text-xs text-vynl-charcoal font-medium">100</span>
+                <div class="control-value text-sm font-bold text-vynl-carbon min-w-[3rem] bg-vynl-cloud/80 px-2 py-1 rounded border border-vynl-steel">
                   {{ currentPadVolume() }}%
                 </div>
               </div>
             </div>
 
             <!-- Control de Pitch -->
-            <div>
-              <label class="block text-sm font-bold text-vynl-carbon mb-3 tracking-wide">PITCH</label>
+            <div class="control-group">
+              <label class="control-label block text-sm font-bold text-vynl-carbon mb-3 tracking-wide">PITCH</label>
               <div class="flex items-center space-x-3">
-                <span class="text-xs text-vynl-charcoal font-medium">-12</span>
-                <input type="range" [value]="currentPadPitch()" (input)="setPadPitch($event)" min="-12" max="12"
-                  step="0.1" class="flex-1 h-3 bg-vynl-slate/20 rounded-lg appearance-none cursor-pointer
-                              slider-thumb:bg-vynl-carbon slider-thumb:rounded-full
-                              hover:bg-vynl-slate/30 transition-all duration-100">
-                <span class="text-xs text-vynl-charcoal font-medium">+12</span>
-                <div class="text-sm font-bold text-vynl-carbon min-w-[3rem]
-                           bg-vynl-cloud/80 px-2 py-1 rounded border border-vynl-steel">
+                <span class="control-min text-xs text-vynl-charcoal font-medium">-12</span>
+                <input type="range" 
+                       [value]="currentPadPitch()" 
+                       (input)="setPadPitch($event)" 
+                       min="-12" max="12" step="0.1"
+                       class="control-slider flex-1 h-3 bg-vynl-slate/20 rounded-lg">
+                <span class="control-max text-xs text-vynl-charcoal font-medium">+12</span>
+                <div class="control-value text-sm font-bold text-vynl-carbon min-w-[3rem] bg-vynl-cloud/80 px-2 py-1 rounded border border-vynl-steel">
                   {{ currentPadPitch() > 0 ? '+' : '' }}{{ currentPadPitch() }}
                 </div>
               </div>
             </div>
 
-            <!-- Efectos -->
-            <div>
-              <label class="block text-sm font-bold text-vynl-carbon mb-3 tracking-wide">EFECTOS</label>
+            <!-- Efectos optimizados -->
+            <div class="control-group">
+              <label class="control-label block text-sm font-bold text-vynl-carbon mb-3 tracking-wide">EFECTOS</label>
               <div class="grid grid-cols-3 gap-2">
-                <button (click)="toggleEffect('reverb')" [class]="hasEffect('reverb') ?
-                          'bg-vynl-carbon text-vynl-white shadow-lg' :
-                          'bg-vynl-silver/60 text-vynl-carbon hover:bg-vynl-steel/60'" class="px-3 py-3 rounded-lg text-xs font-bold transition-all duration-100
-                               border border-vynl-slate/30 transform active:scale-95 shadow-soft">
+                <button (click)="toggleEffect('reverb')" 
+                        class="effect-btn px-3 py-3 rounded-lg text-xs font-bold border border-vynl-slate/30"
+                        [class.active]="hasEffect('reverb')">
                   REVERB
                 </button>
-                <button (click)="toggleEffect('delay')" [class]="hasEffect('delay') ?
-                          'bg-vynl-carbon text-vynl-white shadow-lg' :
-                          'bg-vynl-silver/60 text-vynl-carbon hover:bg-vynl-steel/60'" class="px-3 py-3 rounded-lg text-xs font-bold transition-all duration-100
-                               border border-vynl-slate/30 transform active:scale-95 shadow-soft">
+                <button (click)="toggleEffect('delay')" 
+                        class="effect-btn px-3 py-3 rounded-lg text-xs font-bold border border-vynl-slate/30"
+                        [class.active]="hasEffect('delay')">
                   DELAY
                 </button>
-                <button (click)="toggleEffect('filter')" [class]="hasEffect('filter') ?
-                          'bg-vynl-carbon text-vynl-white shadow-lg' :
-                          'bg-vynl-silver/60 text-vynl-carbon hover:bg-vynl-steel/60'" class="px-3 py-3 rounded-lg text-xs font-bold transition-all duration-100
-                               border border-vynl-slate/30 transform active:scale-95 shadow-soft">
+                <button (click)="toggleEffect('filter')" 
+                        class="effect-btn px-3 py-3 rounded-lg text-xs font-bold border border-vynl-slate/30"
+                        [class.active]="hasEffect('filter')">
                   FILTER
                 </button>
               </div>
             </div>
 
-            <!--  Acciones del Pad -->
+            <!-- Acciones del Pad optimizadas -->
             <div class="pt-4 border-t border-vynl-slate/30">
               <div class="grid grid-cols-2 gap-3">
-                <button (click)="clearSelectedPad()" class="bg-vynl-iron/40 text-vynl-white px-4 py-3 rounded-lg text-xs font-bold
-                               hover:bg-vynl-iron/60 transition-all duration-100
-                               border border-vynl-graphite/30 transform active:scale-95 shadow-soft">
+                <button (click)="clearSelectedPad()" 
+                        class="action-btn bg-vynl-iron/40 text-vynl-white px-4 py-3 rounded-lg text-xs font-bold border border-vynl-graphite/30">
                   LIMPIAR
                 </button>
-                <button (click)="duplicatePad()" class="bg-vynl-steel/40 text-vynl-carbon px-4 py-3 rounded-lg text-xs font-bold
-                               hover:bg-vynl-steel/60 transition-all duration-100
-                               border border-vynl-slate/40 transform active:scale-95 shadow-soft">
+                <button (click)="duplicatePad()" 
+                        class="action-btn bg-vynl-steel/40 text-vynl-carbon px-4 py-3 rounded-lg text-xs font-bold border border-vynl-slate/40">
                   DUPLICAR
                 </button>
               </div>
@@ -299,9 +241,9 @@
 
           </div>
 
-          <!-- Mensaje cuando no hay pad seleccionado -->
-          <div *ngIf="selectedPad() === null" class="text-center text-vynl-charcoal text-sm mt-8
-                                                    bg-vynl-cloud/20 p-6 rounded-lg border border-vynl-steel/30">
+          <!-- Mensaje sin pad seleccionado -->
+          <div *ngIf="selectedPad() === null" 
+               class="text-center text-vynl-charcoal text-sm mt-8 bg-vynl-cloud/20 p-6 rounded-lg border border-vynl-steel/30">
             <div class="text-vynl-carbon font-medium mb-2">PANEL DE CONTROLES</div>
             <div class="text-xs">Haz clic en un pad para ver sus controles</div>
           </div>
@@ -310,37 +252,28 @@
 
     </div>
 
-    
-    <!-- Sección de Controles - Más Compacta -->
+    <!-- Sección de descarga y subida optimizada -->
     <div class="mt-6 grid grid-cols-2 gap-6">
-      <!-- Sección de Descarga -->
-      <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-soft">
-        <h3 class="text-vynl-carbon text-lg font-bold mb-4 tracking-wide text-shadow">DESCARGAR AUDIO</h3>
+      <div class="glass-fast border border-white/20 rounded-2xl p-6">
+        <h3 class="text-vynl-carbon text-lg font-bold mb-4 tracking-wide">DESCARGAR AUDIO</h3>
         <div class="space-y-4">
-          <input type="text" placeholder="URL de YouTube" class="w-full p-4 bg-white/60 backdrop-blur-sm border border-white/40 rounded-xl
-                   text-vynl-carbon placeholder-vynl-charcoal/60
-                   focus:border-vynl-carbon focus:outline-none focus:ring-1 focus:ring-vynl-carbon/20
-                   transition-all duration-100">
-
-          <button class="w-full bg-vynl-carbon text-vynl-white
-                         hover:bg-vynl-iron
-                         p-4 rounded-xl font-bold
-                         transition-all duration-100 transform active:scale-98
-                         shadow-soft hover:shadow-crisp">
+          <input type="text" 
+                 placeholder="URL de YouTube" 
+                 class="input-field w-full p-4 bg-white/60 border border-white/40 rounded-xl text-vynl-carbon placeholder-vynl-charcoal/60">
+          <button class="download-btn w-full bg-vynl-carbon text-vynl-white p-4 rounded-xl font-bold">
             DESCARGAR Y SAMPLEAR
           </button>
         </div>
       </div>
 
-      <!-- Sección de Subida -->
-      <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-soft">
-        <h3 class="text-vynl-carbon text-lg font-bold mb-4 tracking-wide text-shadow">SUBIR SAMPLES</h3>
+      <div class="glass-fast border border-white/20 rounded-2xl p-6">
+        <h3 class="text-vynl-carbon text-lg font-bold mb-4 tracking-wide">SUBIR SAMPLES</h3>
         <div class="space-y-4">
-          <input type="file" multiple accept="audio/*" (change)="onFileSelected($event)" class="w-full p-4 bg-white/60 backdrop-blur-sm border border-white/40 rounded-xl
-                   text-vynl-carbon file:mr-4 file:py-2 file:px-4 file:rounded-lg
-                   file:border-0 file:bg-vynl-carbon file:text-vynl-white file:font-medium
-                   file:transition-all file:duration-100 file:hover:bg-vynl-iron">
-
+          <input type="file" 
+                 multiple 
+                 accept="audio/*" 
+                 (change)="onFileSelected($event)" 
+                 class="file-input w-full p-4 bg-white/60 border border-white/40 rounded-xl text-vynl-carbon">
           <div class="text-xs text-vynl-black font-medium">
             Sube tus drum packs (.wav, .mp3, .aiff)
           </div>

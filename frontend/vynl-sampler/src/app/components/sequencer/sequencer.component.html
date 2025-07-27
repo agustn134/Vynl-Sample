@@ -1,225 +1,330 @@
-<!-- src/app/components/sequencer/sequencer.component.html -->
-
-<div class="sequencer-container bg-gradient-to-br from-vynl-cloud to-vynl-silver p-4 rounded-2xl">
+<!-- sequencer.component.html - PRODUCER UX EDITION -->
+<div class="sequencer-container glass-fast border border-white/20 rounded-2xl p-6 shadow-soft">
   
-  <!-- 🎚️ Header Compacto -->
-  <div class="transport-header glass backdrop-blur-xl border border-white/20 rounded-xl p-3 mb-4">
-    <div class="flex items-center justify-between">
+  <!-- 🎚️ Transport Controls - Estilo Premium -->
+  <div class="transport-section glass-fast border border-white/30 rounded-xl p-4 mb-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       
-      <!-- ▶️ Controles Básicos -->
-      <div class="transport-controls flex items-center gap-3">
+      <!-- ▶️ Sección Principal de Transporte -->
+      <div class="transport-main flex items-center gap-4">
+        
+        <!-- Play/Stop Button Premium -->
         <button (click)="togglePlayback()"
-                class="play-button w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-75"
-                [ngClass]="playbackState().isPlaying ? 'bg-vynl-carbon text-vynl-white' : 'bg-vynl-white text-vynl-carbon'">
-          <span class="text-sm font-bold">{{ playbackState().isPlaying ? 'STOP' : 'PLAY' }}</span>
+                class="play-btn-premium w-14 h-14 rounded-full border-2 flex items-center justify-center font-bold transition-all duration-100 transform active:scale-95"
+                [class.playing]="playbackState().isPlaying">
+          <div class="flex items-center justify-center">
+            <span class="text-lg">{{ playbackState().isPlaying ? '⏸' : '▶' }}</span>
+          </div>
         </button>
 
-        <div class="bpm-control flex items-center gap-2">
-          <label class="text-vynl-carbon font-bold text-sm">BPM</label>
-          <input type="number" min="60" max="200" [(ngModel)]="tempBPM" (change)="updateBPM()"
-                 class="w-14 h-7 bg-vynl-white/80 border border-vynl-slate rounded-lg text-center text-sm font-mono focus:outline-none focus:ring-1 focus:ring-vynl-carbon">
+        <!-- BPM Control Premium -->
+        <div class="bpm-section glass-fast border border-white/20 rounded-lg p-3 min-w-[120px]">
+          <label class="block text-xs font-bold text-vynl-cloud/70 mb-1 tracking-wide uppercase">BPM</label>
+          <div class="flex items-center gap-2">
+            <input type="number" 
+                   min="60" max="200" 
+                   [(ngModel)]="tempBPM" 
+                   (change)="updateBPM()"
+                   class="bpm-input-premium w-16 bg-transparent text-xl font-bold text-vynl-steel text-center border-none outline-none">
+            <div class="bpm-tap-btn w-8 h-8 rounded-full bg-vynl-slate/30 flex items-center justify-center cursor-pointer hover:bg-vynl-slate/50 transition-colors"
+                 title="Tap Tempo">
+              <span class="text-xs font-bold">TAP</span>
+            </div>
+          </div>
         </div>
 
-        <div class="step-indicator flex items-center gap-2">
-          <label class="text-vynl-carbon font-bold text-sm">STEP</label>
-          <div class="w-7 h-7 bg-vynl-carbon text-vynl-white rounded-lg flex items-center justify-center text-sm font-mono">
-            {{ playbackState().currentStep + 1 }}
+        <!-- Step Indicator Premium -->
+        <div class="step-indicator-premium glass-fast border border-white/20 rounded-lg p-3">
+          <label class="block text-xs font-bold text-vynl-cloud/70 mb-1 tracking-wide uppercase">Current Step</label>
+          <div class="flex items-center gap-2">
+            <div class="step-display-premium w-10 h-8 bg-vynl-cloud text-vynl-white rounded-md flex items-center justify-center font-mono font-bold">
+              {{ playbackState().currentStep + 1 }}
+            </div>
+            <span class="text-xs text-vynl-cloud">/ 16</span>
           </div>
         </div>
       </div>
 
-      <!-- 🎚️ Controles Globales Compactos -->
-      <div class="global-controls flex items-center gap-4">
-        <div class="swing-control flex flex-col items-center">
-          <label class="text-xs text-vynl-charcoal font-bold mb-1">SWING</label>
-          <input type="range" min="0" max="100" [(ngModel)]="tempSwing" (input)="updateSwing()"
-                 class="w-12 h-2 bg-vynl-slate rounded-full">
-          <div class="text-xs text-vynl-charcoal mt-1">{{ tempSwing() }}%</div>
+      <!-- 🎚️ Sección de Controles Globales -->
+      <div class="global-controls-section flex items-center gap-4">
+        
+        <!-- Swing Control Premium -->
+        <div class="swing-control-premium glass-fast border border-white/20 rounded-lg p-3 min-w-[100px]">
+          <label class="block text-xs font-bold text-vynl-cloud/70 mb-2 tracking-wide uppercase">Swing</label>
+          <div class="flex items-center gap-2">
+            <input type="range" 
+                   min="0" max="100" 
+                   [(ngModel)]="tempSwing" 
+                   (input)="updateSwing()"
+                   class="swing-slider flex-1 h-2 bg-vynl-slate/30 rounded-full outline-none cursor-pointer">
+            <span class="text-xs font-bold text-vynl-cloud w-8 text-right">{{ tempSwing() }}%</span>
+          </div>
         </div>
 
+        <!-- Humanize Control -->
+        <div class="humanize-control-premium glass-fast border border-white/20 rounded-lg p-3 min-w-[100px]">
+          <label class="block text-xs font-bold text-vynl-cloud/70 mb-2 tracking-wide uppercase">Human</label>
+          <div class="flex items-center gap-2">
+            <input type="range" 
+                   min="0" max="100" 
+                   [(ngModel)]="tempHumanize" 
+                   (input)="updateHumanize()"
+                   class="humanize-slider flex-1 h-2 bg-vynl-slate/30 rounded-full outline-none cursor-pointer">
+            <span class="text-xs font-bold text-vynl-cloud w-8 text-right">{{ tempHumanize() }}%</span>
+          </div>
+        </div>
+
+        <!-- Advanced Toggle Premium -->
         <button (click)="showAdvancedControls.set(!showAdvancedControls())"
-                class="advanced-toggle px-3 py-1 bg-vynl-white/80 text-vynl-carbon rounded-lg text-xs font-bold transition-colors duration-75">
-          {{ showAdvancedControls() ? 'SIMPLE' : 'ADV' }}
+                class="advanced-btn glass-fast border border-white/20 px-4 py-3 rounded-lg text-xs font-bold tracking-wide transition-all duration-100 hover:border-white/40 text-vynl-cloud"
+                [class.active]="showAdvancedControls()">
+          {{ showAdvancedControls() ? 'BASIC' : 'ADVANCED' }}
         </button>
       </div>
     </div>
   </div>
 
-  <!-- 🎹 Grid Principal Compacto -->
-  <div class="sequencer-grid glass backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden">
+  <!-- 🎹 Sequencer Grid Principal -->
+  <div class="sequencer-main glass-fast border border-white/20 rounded-xl overflow-hidden">
     
-    <!-- Header con números de steps -->
-    <div class="grid-header bg-vynl-white/50 border-b border-vynl-slate/30 p-2">
+    <!-- Header Grid con Steps -->
+    <div class="steps-header bg-vynl-carbon/5 border-b border-white/20 p-3">
       <div class="flex">
-        <div class="w-32 flex items-center justify-center">
-          <span class="text-vynl-carbon font-bold text-sm">TRACKS</span>
+        <!-- Track Labels Column -->
+        <div class="w-48 flex items-center justify-center">
+          <h3 class="text-sm font-bold text-vynl-white tracking-wide uppercase">Sample Tracks</h3>
         </div>
+        
+        <!-- Steps Numbers -->
         <div class="flex-1 grid grid-cols-16 gap-1">
-          @for (step of getStepNumbers(); track step) {
-            <div class="step-header h-6 flex items-center justify-center text-xs font-mono text-vynl-charcoal font-bold"
-                 [class.current-step]="playbackState().currentStep === step - 1">
-              {{ step }}
+          @for (stepNum of stepNumbers(); track stepNum) {
+            <div class="step-number h-8 flex items-center justify-center text-xs font-mono font-bold text-vynl-cloud rounded-md"
+                 [class.current-step-header]="playbackState().currentStep === stepNum - 1 && playbackState().isPlaying"
+                 [class.beat-strong]="stepNum === 1 || stepNum === 5 || stepNum === 9 || stepNum === 13"
+                 [class.beat-weak]="stepNum !== 1 && stepNum !== 5 && stepNum !== 9 && stepNum !== 13">
+              {{ stepNum }}
             </div>
           }
         </div>
       </div>
     </div>
 
-    <!-- Track Rows Compactas -->
-    <div class="tracks-container max-h-80 overflow-y-auto">
-      @for (track of currentPattern().tracks; track track.id) {
-        <div class="track-row border-b border-vynl-slate/20 transition-colors duration-75"
-             [ngClass]="getTrackClass(track)">
+    <!-- Tracks Container -->
+    <div class="tracks-container max-h-96 overflow-y-auto">
+      @for (track of tracksWithSampleNames(); track trackByTrackId($index, track)) {
+        <div class="track-row-premium border-b border-white/10 transition-all duration-100"
+             [class]="getTrackClass(track)"
+             (click)="onTrackSelect(track.id)">
           
           <div class="flex">
-            <!-- Track Info Compacta -->
-            <div class="track-info w-32 p-2 bg-vynl-white/20 flex items-center justify-between">
-              <div class="track-details flex items-center gap-1">
-                <div class="pad-indicator w-5 h-5 rounded flex items-center justify-center text-xs font-bold text-vynl-white"
-                     [style.background-color]="track.color">
+            
+            <!-- 🎵 Track Info Premium -->
+            <div class="track-info-premium w-48 p-3 glass-fast border-r border-white/10 flex items-center justify-between">
+              
+              <!-- Sample Info -->
+              <div class="sample-section flex items-center gap-3">
+                <!-- Pad Number -->
+                <div class="pad-number w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
+                     [style.background]="track.color">
                   {{ track.padIndex + 1 }}
                 </div>
-                <div class="track-name text-sm font-bold text-vynl-carbon truncate">
-                  {{ track.name }}
+                
+                <!-- Sample Name & Status -->
+                <div class="sample-details flex flex-col justify-center min-w-0">
+                  <div class="sample-name text-sm font-bold text-vynl-carbon truncate max-w-24"
+                       [class.has-sample]="track.hasAudio"
+                       [title]="track.displayName">
+                    {{ track.displayName }}
+                  </div>
+                  <div class="sample-status flex items-center gap-2">
+                    <div *ngIf="track.hasAudio" class="status-dot w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span class="text-xs text-vynl-cloud/60 uppercase tracking-wide">
+                      {{ track.hasAudio ? 'LOADED' : 'EMPTY' }}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div class="track-buttons flex items-center gap-1">
-                <button (click)="onMuteToggle(track.id)"
-                        class="w-5 h-5 rounded text-xs font-bold transition-colors duration-75"
-                        [ngClass]="track.mute ? 'bg-vynl-carbon text-vynl-white' : 'bg-vynl-slate/50 text-vynl-charcoal'">
+              <!-- Track Controls -->
+              <div class="track-controls flex items-center gap-2">
+                <button (click)="onMuteToggle(track.id, $event)"
+                        class="control-btn-mini w-6 h-6 rounded text-xs font-bold transition-all duration-100"
+                        [class.active]="track.mute"
+                        title="Mute Track">
                   M
                 </button>
-                <button (click)="onSoloToggle(track.id)"
-                        class="w-5 h-5 rounded text-xs font-bold transition-colors duration-75"
-                        [ngClass]="track.solo ? 'bg-vynl-carbon text-vynl-white' : 'bg-vynl-slate/50 text-vynl-charcoal'">
+                <button (click)="onSoloToggle(track.id, $event)"
+                        class="control-btn-mini w-6 h-6 rounded text-xs font-bold transition-all duration-100"
+                        [class.active]="track.solo"
+                        title="Solo Track">
                   S
                 </button>
               </div>
             </div>
 
-            <!-- Step Grid Compacto -->
-            <div class="steps-grid flex-1 p-2 grid grid-cols-16 gap-1">
-              @for (step of track.steps; track $index) {
-                <button class="step-button relative w-6 h-6 rounded transition-none focus:outline-none"
-                        [ngClass]="{
-                          'step-active': step.isActive,
-                          'step-inactive': !step.isActive,
-                          'current-playback': playbackState().currentStep === $index && playbackState().isPlaying,
-                          'step-selected': selectedStep() === $index && selectedTrack() === track.id
-                        }"
-                        [style.background-color]="step.isActive ? track.color : 'transparent'"
-                        [style.opacity]="step.isActive ? (step.velocity / 127) : 0.3"
-                        (click)="onStepClick(track.id, $index, $event)"
-                        (wheel)="onStepWheel(track.id, $index, $event)">
-                </button>
-              }
-            </div>
+            <!-- 🎹 Steps Grid Premium - MEJORADO -->
+<div class="steps-section flex-1 p-3 grid grid-cols-16 gap-1">
+  @for (step of track.steps; track trackByStepIndex($index, step)) {
+    <button class="step-btn-premium relative w-7 h-8 rounded-md transition-all duration-100 cursor-pointer"
+            [class]="getStepClass(track, $index)"
+            [style.opacity]="getStepOpacity(step)"
+            (click)="onStepClick(track.id, $index, $event)"
+            (wheel)="onStepWheel(track.id, $index, $event)"
+            [title]="getStepTooltip(step, $index)">
+      
+      <!-- Step Content Container -->
+      <div class="step-content absolute inset-0 rounded-md overflow-hidden">
+        
+        <!-- Velocity Bar Mejorado -->
+        <div *ngIf="step.isActive"
+             class="velocity-bar absolute bottom-0 left-0 right-0 rounded-b-md transition-all duration-100"
+             [style.height.%]="(step.velocity / 127) * 100">
+        </div>
+        
+        <!-- Active Step Overlay -->
+        <div *ngIf="step.isActive" 
+             class="active-overlay absolute inset-0 rounded-md">
+        </div>
+        
+        <!-- Step Number (solo en beats principales) -->
+        <div *ngIf="($index + 1) % 4 === 1" 
+             class="step-number absolute top-0.5 left-0.5 text-xs font-bold opacity-60">
+          {{ $index + 1 }}
+        </div>
+        
+        <!-- Probability Indicator Mejorado -->
+        <div *ngIf="step.isActive && step.probability < 100"
+             class="probability-indicator absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full">
+        </div>
+        
+        <!-- Pan Indicator -->
+        <div *ngIf="step.isActive && step.pan !== 0"
+             class="pan-indicator absolute bottom-0.5 right-0.5 w-1 h-1 rounded-full">
+        </div>
+      </div>
+    </button>
+  }
+</div>
           </div>
         </div>
       }
     </div>
   </div>
 
-  <!-- 🎚️ Advanced Controls Panel - Solo cuando es necesario -->
+  <!-- 🎚️ Advanced Controls Panel -->
   @if (showAdvancedControls() && selectedTrackData() && selectedStepData()) {
-    <div class="advanced-panel glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 mt-6">
+    <div class="advanced-controls-premium glass-fast border border-white/20 rounded-xl p-6 mt-6">
       
-      <h3 class="text-vynl-carbon text-lg font-bold mb-4">
-        ADVANCED - {{ selectedTrackData()!.name }} Step {{ selectedStep()! + 1 }}
-      </h3>
+      <!-- Header -->
+      <div class="advanced-header flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-vynl-carbon">
+          Step Editor - {{ selectedTrackData()!.displayName }} 
+          <span class="text-sm font-normal text-vynl-charcoal">Step {{ selectedStep()! + 1 }}</span>
+        </h3>
+        <button (click)="showAdvancedControls.set(false)"
+                class="close-btn w-8 h-8 rounded-full bg-vynl-slate/20 hover:bg-vynl-slate/40 flex items-center justify-center transition-colors">
+          ✕
+        </button>
+      </div>
 
-      <div class="controls-grid grid grid-cols-2 md:grid-cols-4 gap-6">
+      <!-- Controls Grid -->
+      <div class="controls-grid grid grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <!-- 🎚️ Velocity -->
-        <div class="control-group">
-          <label class="block text-sm font-bold text-vynl-carbon mb-2">VELOCITY</label>
-          <input 
-            type="range" 
-            min="0" 
-            max="127" 
-            [value]="selectedStepData()!.velocity"
-            (input)="sequencerService.updateStepVelocity(selectedTrackData()!.id, selectedStep()!, +$any($event.target).value)"
-            class="w-full h-2 bg-vynl-slate rounded-full">
-          <div class="text-xs text-vynl-charcoal mt-1 text-center">{{ selectedStepData()!.velocity }}/127</div>
-        </div>
-
-        <!-- 🎯 Pan -->
-        <div class="control-group">
-          <label class="block text-sm font-bold text-vynl-carbon mb-2">PAN</label>
-          <input 
-            type="range" 
-            min="-100" 
-            max="100" 
-            [value]="selectedStepData()!.pan * 100"
-            (input)="sequencerService.updateStepPan(selectedTrackData()!.id, selectedStep()!, +$any($event.target).value / 100)"
-            class="w-full h-2 bg-vynl-slate rounded-full">
-          <div class="text-xs text-vynl-charcoal mt-1 text-center">
-            {{ selectedStepData()!.pan > 0 ? 'R' : selectedStepData()!.pan < 0 ? 'L' : 'C' }}{{ Math.abs(selectedStepData()!.pan * 100).toFixed(0) }}
+        <!-- Velocity -->
+        <div class="control-section">
+          <label class="control-label block text-sm font-bold text-vynl-carbon mb-3 tracking-wide uppercase">Velocity</label>
+          <div class="control-wrapper glass-fast border border-white/20 rounded-lg p-4">
+            <input type="range" 
+                   min="0" max="127" 
+                   [value]="selectedStepData()!.velocity"
+                   (input)="sequencerService.updateStepVelocity(selectedTrackData()!.id, selectedStep()!, +$any($event.target).value)"
+                   class="premium-slider w-full h-3 bg-vynl-slate/30 rounded-full mb-2">
+            <div class="value-display text-center">
+              <span class="text-lg font-bold text-vynl-carbon">{{ selectedStepData()!.velocity }}</span>
+              <span class="text-xs text-vynl-charcoal ml-1">/127</span>
+            </div>
           </div>
         </div>
 
-        <!-- 🎲 Probability -->
-        <div class="control-group">
-          <label class="block text-sm font-bold text-vynl-carbon mb-2">CHANCE</label>
-          <input 
-            type="range" 
-            min="0" 
-            max="100" 
-            [value]="selectedStepData()!.probability"
-            class="w-full h-2 bg-vynl-slate rounded-full">
-          <div class="text-xs text-vynl-charcoal mt-1 text-center">{{ selectedStepData()!.probability }}%</div>
+        <!-- Pan -->
+        <div class="control-section">
+          <label class="control-label block text-sm font-bold text-vynl-carbon mb-3 tracking-wide uppercase">Pan</label>
+          <div class="control-wrapper glass-fast border border-white/20 rounded-lg p-4">
+            <input type="range" 
+                   min="-100" max="100" 
+                   [value]="selectedStepData()!.pan * 100"
+                   (input)="sequencerService.updateStepPan(selectedTrackData()!.id, selectedStep()!, +$any($event.target).value / 100)"
+                   class="premium-slider w-full h-3 bg-vynl-slate/30 rounded-full mb-2">
+            <div class="value-display text-center">
+              <span class="text-lg font-bold text-vynl-carbon">
+                {{ selectedStepData()!.pan > 0 ? 'R' : selectedStepData()!.pan < 0 ? 'L' : 'C' }}{{ Math.abs(selectedStepData()!.pan * 100).toFixed(0) }}
+              </span>
+            </div>
+          </div>
         </div>
 
-        <!-- ⏱️ Note Length -->
-        <div class="control-group">
-          <label class="block text-sm font-bold text-vynl-carbon mb-2">LENGTH</label>
-          <input 
-            type="range" 
-            min="10" 
-            max="400" 
-            [value]="selectedStepData()!.noteLength * 100"
-            class="w-full h-2 bg-vynl-slate rounded-full">
-          <div class="text-xs text-vynl-charcoal mt-1 text-center">{{ (selectedStepData()!.noteLength * 100).toFixed(0) }}%</div>
+        <!-- Probability -->
+        <div class="control-section">
+          <label class="control-label block text-sm font-bold text-vynl-carbon mb-3 tracking-wide uppercase">Chance</label>
+          <div class="control-wrapper glass-fast border border-white/20 rounded-lg p-4">
+            <input type="range" 
+                   min="0" max="100" 
+                   [value]="selectedStepData()!.probability"
+                   class="premium-slider w-full h-3 bg-vynl-slate/30 rounded-full mb-2">
+            <div class="value-display text-center">
+              <span class="text-lg font-bold text-vynl-carbon">{{ selectedStepData()!.probability }}</span>
+              <span class="text-xs text-vynl-charcoal ml-1">%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Note Length -->
+        <div class="control-section">
+          <label class="control-label block text-sm font-bold text-vynl-carbon mb-3 tracking-wide uppercase">Length</label>
+          <div class="control-wrapper glass-fast border border-white/20 rounded-lg p-4">
+            <input type="range" 
+                   min="10" max="400" 
+                   [value]="selectedStepData()!.noteLength * 100"
+                   class="premium-slider w-full h-3 bg-vynl-slate/30 rounded-full mb-2">
+            <div class="value-display text-center">
+              <span class="text-lg font-bold text-vynl-carbon">{{ (selectedStepData()!.noteLength * 100).toFixed(0) }}</span>
+              <span class="text-xs text-vynl-charcoal ml-1">%</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 🎵 Advanced Options Row -->
-      <div class="advanced-options mt-6 flex items-center gap-6">
+      <!-- Advanced Options -->
+      <div class="advanced-options mt-6 flex flex-wrap items-center gap-6">
         
-        <!-- 🎼 Triplet Toggle -->
-        <div class="triplet-control">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="checkbox" 
-              [checked]="selectedStepData()!.triplet"
-              class="w-4 h-4">
-            <span class="text-sm font-bold text-vynl-carbon">TRIPLET</span>
+        <!-- Triplet -->
+        <div class="option-control glass-fast border border-white/20 rounded-lg p-3">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" 
+                   [checked]="selectedStepData()!.triplet"
+                   class="w-5 h-5 rounded accent-vynl-carbon">
+            <span class="text-sm font-bold text-vynl-carbon uppercase tracking-wide">Triplet</span>
           </label>
         </div>
 
-        <!-- 🎚️ Step Humanize -->
-        <div class="humanize-control flex items-center gap-3">
-          <label class="text-sm font-bold text-vynl-carbon">HUMANIZE</label>
-          <input 
-            type="range" 
-            min="0" 
-            max="100" 
-            [value]="selectedStepData()!.humanize"
-            class="w-24 h-2 bg-vynl-slate rounded-full">
-          <span class="text-xs text-vynl-charcoal w-8">{{ selectedStepData()!.humanize }}%</span>
+        <!-- Step Humanize -->
+        <div class="option-control glass-fast border border-white/20 rounded-lg p-3 flex items-center gap-3">
+          <label class="text-sm font-bold text-vynl-steel uppercase tracking-wide">Step Humanize</label>
+          <input type="range" 
+                 min="0" max="100" 
+                 [value]="selectedStepData()!.humanize"
+                 class="premium-slider w-20 h-2 bg-vynl-slate/30 rounded-full">
+          <span class="text-sm font-bold text-vynl-carbon w-10 text-right">{{ selectedStepData()!.humanize }}%</span>
         </div>
 
-        <!-- 🎵 Step Swing -->
-        <div class="swing-control flex items-center gap-3">
-          <label class="text-sm font-bold text-vynl-carbon">SWING</label>
-          <input 
-            type="range" 
-            min="0" 
-            max="100" 
-            [value]="selectedStepData()!.swing"
-            class="w-24 h-2 bg-vynl-slate rounded-full">
-          <span class="text-xs text-vynl-charcoal w-8">{{ selectedStepData()!.swing }}%</span>
+        <!-- Step Swing -->
+        <div class="option-control glass-fast border border-white/20 rounded-lg p-3 flex items-center gap-3">
+          <label class="text-sm font-bold text-vynl-carbon uppercase tracking-wide">Step Swing</label>
+          <input type="range" 
+                 min="0" max="100" 
+                 [value]="selectedStepData()!.swing"
+                 class="premium-slider w-20 h-2 bg-vynl-slate/30 rounded-full">
+          <span class="text-sm font-bold text-vynl-carbon w-10 text-right">{{ selectedStepData()!.swing }}%</span>
         </div>
       </div>
     </div>

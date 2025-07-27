@@ -1,4 +1,4 @@
-// src/app/services/sequencer.service.ts
+// src/app/services/sequencer.service.ts - PERFORMANCE EDITION
 import { Injectable, signal, computed } from '@angular/core';
 import { AudioService } from './audio.service';
 import * as Tone from 'tone';
@@ -10,6 +10,13 @@ import { SequencerTrack, SequencerStep, SequencerPattern, PlaybackState } from '
 export class SequencerService {
   private sequence: Tone.Sequence | null = null;
   private nextStepTime = 0;
+
+  // ⚡ Performance optimizations
+  private updateQueue = new Map<string, any>();
+  private isUpdating = false;
+  private lastUpdateTime = 0;
+  private minUpdateInterval = 16; // 60fps max
+  private stepPlaybackCache = new Map<number, SequencerTrack[]>();
 
   // 🎵 State Signals
   private _playbackState = signal<PlaybackState>({
@@ -31,7 +38,7 @@ export class SequencerService {
   private _selectedTrack = signal<string | null>(null);
   private _selectedStep = signal<number | null>(null);
 
-  // 🎯 Public Computed Values
+  // 🎯 Public Computed Values (cached)
   playbackState = computed(() => this._playbackState());
   currentPattern = computed(() => this._currentPattern());
   selectedTrack = computed(() => this._selectedTrack());
@@ -39,38 +46,48 @@ export class SequencerService {
   isPlaying = computed(() => this._playbackState().isPlaying);
   currentStep = computed(() => this._playbackState().currentStep);
 
+  // ⚡ Computed optimizado para tracks activas
+  activeTracks = computed(() => {
+    const pattern = this._currentPattern();
+    return pattern.tracks.filter(track => !track.mute && this.hasActiveSteps(track));
+  });
+
   constructor(private audioService: AudioService) {
     this.initializePattern();
+    this.precomputeStepPlayback();
   }
 
-  // 🆕 Inicializar pattern con 16 tracks vacías
+  // 🚀 MÉTODO OPTIMIZADO: Inicializar pattern
   private initializePattern(): void {
     const tracks: SequencerTrack[] = [];
     
-    for (let i = 0; i < 16; i++) {
-      tracks.push({
-        id: `track-${i}`,
-        padIndex: i,
-        name: `Track ${i + 1}`,
-        steps: this.createEmptySteps(16),
-        mute: false,
-        solo: false,
-        volume: 80,
-        pan: 0,
-        color: this.getTrackColor(i),
-        isSelected: false
-      });
-    }
+    // Batch creation para mejor performance
+    const trackData = Array.from({ length: 16 }, (_, i) => ({
+      id: `track-${i}`,
+      padIndex: i,
+      name: `Track ${i + 1}`,
+      steps: this.createEmptySteps(16),
+      mute: false,
+      solo: false,
+      volume: 80,
+      pan: 0,
+      color: this.getTrackColor(i),
+      isSelected: false
+    }));
 
     this._currentPattern.update(pattern => ({
       ...pattern,
-      tracks
+      tracks: trackData
     }));
+
+    console.log('🎹 Sequencer pattern initialized with 16 tracks');
   }
 
-  // 🎨 Crear steps vacíos con valores por defecto
+  // ⚡ MÉTODO OPTIMIZADO: Crear steps vacíos
   private createEmptySteps(length: number): SequencerStep[] {
-    return Array.from({ length }, () => ({
+    // Pre-allocate array para mejor performance
+    const steps = new Array(length);
+    const defaultStep = {
       isActive: false,
       velocity: 100,
       pan: 0,
@@ -79,22 +96,58 @@ export class SequencerService {
       triplet: false,
       noteLength: 1.0,
       swing: 0
-    }));
+    };
+
+    for (let i = 0; i < length; i++) {
+      steps[i] = { ...defaultStep };
+    }
+
+    return steps;
   }
 
-  // 🌈 Colores para tracks (basado en tu paleta VYNL)
+  // 🚀 MÉTODO NUEVO: Pre-computar playback data
+  private precomputeStepPlayback(): void {
+    const pattern = this._currentPattern();
+    this.stepPlaybackCache.clear();
+
+    for (let stepIndex = 0; stepIndex < pattern.length; stepIndex++) {
+      const activeTracksForStep = pattern.tracks.filter(track => 
+        !track.mute && track.steps[stepIndex]?.isActive
+      );
+      this.stepPlaybackCache.set(stepIndex, activeTracksForStep);
+    }
+  }
+
+  // ⚡ MÉTODO OPTIMIZADO: Verificar si track tiene steps activos
+  private hasActiveSteps(track: SequencerTrack): boolean {
+    for (let i = 0; i < track.steps.length; i++) {
+      if (track.steps[i].isActive) return true;
+    }
+    return false;
+  }
+
+  // 🌈 MÉTODO OPTIMIZADO: Colores para tracks
   private getTrackColor(index: number): string {
+    // Pre-computed colors array
     const colors = [
-      '#6c757d', '#495057', '#343a40', '#212529', // Grises
-      '#adb5bd', '#dee2e6', '#e9ecef', '#f8f9fa', // Claros
-      '#6c757d', '#495057', '#343a40', '#212529', // Repetir
+      '#6c757d', '#495057', '#343a40', '#212529',
+      '#adb5bd', '#dee2e6', '#e9ecef', '#f8f9fa',
+      '#6c757d', '#495057', '#343a40', '#212529',
       '#adb5bd', '#dee2e6', '#e9ecef', '#f8f9fa'
     ];
     return colors[index % colors.length];
   }
 
-  // 🎵 Toggle step en una track específica
+  // 🚀 MÉTODO OPTIMIZADO: Toggle step con batching
   toggleStep(trackId: string, stepIndex: number): void {
+    // Debounce updates para evitar spam
+    const now = performance.now();
+    if (now - this.lastUpdateTime < this.minUpdateInterval) {
+      this.queueUpdate('toggleStep', { trackId, stepIndex });
+      return;
+    }
+    this.lastUpdateTime = now;
+
     this._currentPattern.update(pattern => ({
       ...pattern,
       tracks: pattern.tracks.map(track => 
@@ -111,11 +164,87 @@ export class SequencerService {
       )
     }));
 
+    // Update cache
+    this.updateStepCache(stepIndex);
     console.log(`🎯 Step ${stepIndex + 1} toggled on ${trackId}`);
   }
 
-  // 🎚️ Actualizar velocity de un step
+  // 🚀 MÉTODO NUEVO: Queue system para updates
+  private queueUpdate(action: string, data: any): void {
+    this.updateQueue.set(`${action}-${Date.now()}`, { action, data });
+    
+    if (!this.isUpdating) {
+      this.isUpdating = true;
+      requestAnimationFrame(() => this.processUpdateQueue());
+    }
+  }
+
+  // 🚀 MÉTODO NUEVO: Procesar queue de updates
+  private processUpdateQueue(): void {
+    const updates = Array.from(this.updateQueue.values());
+    this.updateQueue.clear();
+
+    updates.forEach(({ action, data }) => {
+      switch (action) {
+        case 'toggleStep':
+          this.toggleStepImmediate(data.trackId, data.stepIndex);
+          break;
+        case 'updateVelocity':
+          this.updateStepVelocityImmediate(data.trackId, data.stepIndex, data.velocity);
+          break;
+        case 'updatePan':
+          this.updateStepPanImmediate(data.trackId, data.stepIndex, data.pan);
+          break;
+      }
+    });
+
+    this.isUpdating = false;
+  }
+
+  // 🚀 MÉTODO NUEVO: Update cache para step específico
+  private updateStepCache(stepIndex: number): void {
+    const pattern = this._currentPattern();
+    const activeTracksForStep = pattern.tracks.filter(track => 
+      !track.mute && track.steps[stepIndex]?.isActive
+    );
+    this.stepPlaybackCache.set(stepIndex, activeTracksForStep);
+  }
+
+  // ⚡ MÉTODOS INMEDIATOS (sin debounce)
+  private toggleStepImmediate(trackId: string, stepIndex: number): void {
+    this._currentPattern.update(pattern => ({
+      ...pattern,
+      tracks: pattern.tracks.map(track => 
+        track.id === trackId 
+          ? {
+              ...track,
+              steps: track.steps.map((step, index) => 
+                index === stepIndex 
+                  ? { ...step, isActive: !step.isActive }
+                  : step
+              )
+            }
+          : track
+      )
+    }));
+    this.updateStepCache(stepIndex);
+  }
+
+  // 🎚️ MÉTODO OPTIMIZADO: Update velocity con debounce
   updateStepVelocity(trackId: string, stepIndex: number, velocity: number): void {
+    const now = performance.now();
+    if (now - this.lastUpdateTime < this.minUpdateInterval) {
+      this.queueUpdate('updateVelocity', { trackId, stepIndex, velocity });
+      return;
+    }
+    this.lastUpdateTime = now;
+
+    this.updateStepVelocityImmediate(trackId, stepIndex, velocity);
+  }
+
+  private updateStepVelocityImmediate(trackId: string, stepIndex: number, velocity: number): void {
+    const clampedVelocity = Math.max(0, Math.min(127, velocity));
+    
     this._currentPattern.update(pattern => ({
       ...pattern,
       tracks: pattern.tracks.map(track => 
@@ -124,7 +253,7 @@ export class SequencerService {
               ...track,
               steps: track.steps.map((step, index) => 
                 index === stepIndex 
-                  ? { ...step, velocity: Math.max(0, Math.min(127, velocity)) }
+                  ? { ...step, velocity: clampedVelocity }
                   : step
               )
             }
@@ -133,8 +262,21 @@ export class SequencerService {
     }));
   }
 
-  // 🎯 Actualizar paneo de un step
+  // 🎯 MÉTODO OPTIMIZADO: Update pan con debounce
   updateStepPan(trackId: string, stepIndex: number, pan: number): void {
+    const now = performance.now();
+    if (now - this.lastUpdateTime < this.minUpdateInterval) {
+      this.queueUpdate('updatePan', { trackId, stepIndex, pan });
+      return;
+    }
+    this.lastUpdateTime = now;
+
+    this.updateStepPanImmediate(trackId, stepIndex, pan);
+  }
+
+  private updateStepPanImmediate(trackId: string, stepIndex: number, pan: number): void {
+    const clampedPan = Math.max(-1, Math.min(1, pan));
+    
     this._currentPattern.update(pattern => ({
       ...pattern,
       tracks: pattern.tracks.map(track => 
@@ -143,7 +285,7 @@ export class SequencerService {
               ...track,
               steps: track.steps.map((step, index) => 
                 index === stepIndex 
-                  ? { ...step, pan: Math.max(-1, Math.min(1, pan)) }
+                  ? { ...step, pan: clampedPan }
                   : step
               )
             }
@@ -152,58 +294,63 @@ export class SequencerService {
     }));
   }
 
-  // 🎲 Toggle humanizador global
+  // 🎲 MÉTODO OPTIMIZADO: Global controls
   updateGlobalHumanize(amount: number): void {
+    const clampedAmount = Math.max(0, Math.min(100, amount));
     this._currentPattern.update(pattern => ({
       ...pattern,
-      humanize: Math.max(0, Math.min(100, amount))
+      humanize: clampedAmount
     }));
   }
 
-  // 🎵 Actualizar swing global
   updateGlobalSwing(amount: number): void {
+    const clampedAmount = Math.max(0, Math.min(100, amount));
     this._currentPattern.update(pattern => ({
       ...pattern,
-      swing: Math.max(0, Math.min(100, amount))
+      swing: clampedAmount
     }));
   }
 
-// ▶️ Reproducir secuencia
-async play(): Promise<void> {  // ✅ Cambiar de void a Promise<void>
-  if (this.sequence) {
-    this.sequence.dispose();
+  // ▶️ MÉTODO OPTIMIZADO: Play con cache
+  async play(): Promise<void> {
+    if (this.sequence) {
+      this.sequence.dispose();
+    }
+
+    // Pre-compute playback data
+    this.precomputeStepPlayback();
+
+    const pattern = this._currentPattern();
+    const subdivisionTime = `${pattern.length}n`;
+
+    this.sequence = new Tone.Sequence(
+      (time, step) => {
+        this.playStepOptimized(step, time);
+        
+        // Optimized visual update
+        Tone.Draw.schedule(() => {
+          this._playbackState.update(state => ({
+            ...state,
+            currentStep: step
+          }));
+        }, time);
+      },
+      Array.from({ length: pattern.length }, (_, i) => i),
+      subdivisionTime
+    );
+
+    this.sequence.start(0);
+    Tone.Transport.start();
+
+    this._playbackState.update(state => ({
+      ...state,
+      isPlaying: true
+    }));
+
+    console.log('▶️ Sequencer started (optimized)');
   }
 
-  const pattern = this._currentPattern();
-  const subdivisionTime = `${pattern.length}n`;
-
-  this.sequence = new Tone.Sequence(
-    (time, step) => {
-      this.playStep(step, time);
-      
-      // Actualizar current step visual
-      Tone.Draw.schedule(() => {
-        this._playbackState.update(state => ({
-          ...state,
-          currentStep: step
-        }));
-      }, time);
-    },
-    Array.from({ length: pattern.length }, (_, i) => i),
-    subdivisionTime
-  );
-
-  this.sequence.start(0);
-  Tone.Transport.start();
-
-  this._playbackState.update(state => ({
-    ...state,
-    isPlaying: true
-  }));
-
-  console.log('▶️ Sequencer started');
-}
-  // ⏹️ Detener secuencia
+  // ⏹️ MÉTODO OPTIMIZADO: Stop
   stop(): void {
     if (this.sequence) {
       this.sequence.stop();
@@ -219,44 +366,50 @@ async play(): Promise<void> {  // ✅ Cambiar de void a Promise<void>
       currentStep: 0
     }));
 
-    console.log('⏹️ Sequencer stopped');
+    // Clear caches
+    this.stepPlaybackCache.clear();
+    this.updateQueue.clear();
+
+    console.log('⏹️ Sequencer stopped (optimized)');
   }
 
-  // 🎵 Reproducir step específico con todas las mejoras
-  private playStep(stepIndex: number, time: number): void {
+  // 🚀 MÉTODO ULTRA-OPTIMIZADO: Play step con cache
+  private playStepOptimized(stepIndex: number, time: number): void {
+    // Usar cache en lugar de filtrar cada vez
+    const activeTracksForStep = this.stepPlaybackCache.get(stepIndex);
+    if (!activeTracksForStep || activeTracksForStep.length === 0) return;
+
     const pattern = this._currentPattern();
-    
-    pattern.tracks.forEach(track => {
-      if (track.mute) return;
-      
+
+    activeTracksForStep.forEach(track => {
       const step = track.steps[stepIndex];
       if (!step.isActive) return;
 
-      // 🎲 Probability check
+      // 🎲 Probability check optimizado
       if (Math.random() * 100 > step.probability) return;
 
-      // 🎵 Calcular timing con humanize y swing
+      // 🎵 Timing calculations optimizados
       let scheduledTime = time;
       
-      // Humanize: pequeña variación aleatoria en timing
+      // Humanize
       if (step.humanize > 0 || pattern.humanize > 0) {
-        const humanizeAmount = Math.max(step.humanize, pattern.humanize) / 100;
-        const variation = (Math.random() - 0.5) * humanizeAmount * 0.02; // ±20ms max
+        const humanizeAmount = Math.max(step.humanize, pattern.humanize) * 0.0002; // Pre-calculated
+        const variation = (Math.random() - 0.5) * humanizeAmount;
         scheduledTime += variation;
       }
 
-      // Swing: delays en beats pares/impares
+      // Swing
       if (step.swing > 0 || pattern.swing > 0) {
-        const swingAmount = Math.max(step.swing, pattern.swing) / 100;
-        if (stepIndex % 2 === 1) { // Beats impares
-          scheduledTime += swingAmount * 0.05; // Delay sutil
+        const swingAmount = Math.max(step.swing, pattern.swing) * 0.0005; // Pre-calculated
+        if (stepIndex % 2 === 1) {
+          scheduledTime += swingAmount;
         }
       }
 
-      // 🎚️ Aplicar velocity
-      const velocity = step.velocity / 127;
+      // 🎚️ Velocity optimizado
+      const velocity = step.velocity * 0.007874; // Pre-calculated /127
 
-      // 🎯 Reproducir con paneo
+      // 🎯 Play optimizado
       this.audioService.playPadWithEffects(
         track.padIndex,
         velocity,
@@ -266,7 +419,7 @@ async play(): Promise<void> {  // ✅ Cambiar de void a Promise<void>
     });
   }
 
-  // 🎚️ BPM Control
+  // 🎚️ MÉTODO OPTIMIZADO: BPM Control
   setBPM(bpm: number): void {
     const clampedBPM = Math.max(60, Math.min(200, bpm));
     Tone.Transport.bpm.value = clampedBPM;
@@ -279,7 +432,7 @@ async play(): Promise<void> {  // ✅ Cambiar de void a Promise<void>
     console.log(`🎵 BPM set to ${clampedBPM}`);
   }
 
-  // 🎯 Seleccionar track
+  // 🎯 MÉTODOS DE SELECCIÓN optimizados
   selectTrack(trackId: string): void {
     this._selectedTrack.set(trackId);
     
@@ -292,12 +445,11 @@ async play(): Promise<void> {  // ✅ Cambiar de void a Promise<void>
     }));
   }
 
-  // 🎯 Seleccionar step para edición detallada
   selectStep(stepIndex: number): void {
     this._selectedStep.set(stepIndex);
   }
 
-  // 🔇 Toggle mute track
+  // 🔇 MÉTODOS DE CONTROL optimizados
   toggleMute(trackId: string): void {
     this._currentPattern.update(pattern => ({
       ...pattern,
@@ -307,9 +459,11 @@ async play(): Promise<void> {  // ✅ Cambiar de void a Promise<void>
           : track
       )
     }));
+
+    // Update cache cuando se mutea/unmutea
+    this.precomputeStepPlayback();
   }
 
-  // 🔊 Toggle solo track
   toggleSolo(trackId: string): void {
     this._currentPattern.update(pattern => ({
       ...pattern,
@@ -319,5 +473,26 @@ async play(): Promise<void> {  // ✅ Cambiar de void a Promise<void>
           : track
       )
     }));
+
+    // Update cache cuando se hace solo
+    this.precomputeStepPlayback();
+  }
+
+  // 🧹 CLEANUP optimizado
+  dispose(): void {
+    this.stop();
+    this.stepPlaybackCache.clear();
+    this.updateQueue.clear();
+    console.log('🧹 Sequencer service disposed');
+  }
+
+  // 🔍 DEBUG methods
+  getPerformanceStats(): any {
+    return {
+      cacheSize: this.stepPlaybackCache.size,
+      queueSize: this.updateQueue.size,
+      isUpdating: this.isUpdating,
+      activeTracks: this.activeTracks().length
+    };
   }
 }
