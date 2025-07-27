@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AudioService } from '../../services/audio.service';
 import { InputService } from '../../services/input.service';
 import { WaveformService } from '../../services/waveform.service';
+import { SequencerComponent } from '../sequencer/sequencer.component';
 
 interface Pad {
   id: number;
@@ -24,7 +25,7 @@ interface PadControls {
 @Component({
   selector: 'app-sampler',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,SequencerComponent ],
   templateUrl: './sampler.html',
   styleUrls: ['./sampler.scss'],
 })
@@ -40,6 +41,9 @@ export class SamplerComponent implements OnInit, OnDestroy {
   // 🆕 Nuevos signals para controles
   selectedPad = signal<number | null>(null);
   padControls = signal<PadControls[]>([]);
+
+  showSequencer = signal(false);
+
 
   constructor(
     public audioService: AudioService,
@@ -86,6 +90,12 @@ export class SamplerComponent implements OnInit, OnDestroy {
       });
     }
     this.pads.set(padsArray);
+  }
+
+  // 🆕 Método para toggle del secuenciador
+  toggleSequencer(): void {
+    this.showSequencer.set(!this.showSequencer());
+    console.log(`🎹 Sequencer ${this.showSequencer() ? 'shown' : 'hidden'}`);
   }
 
   initializePadControls() {

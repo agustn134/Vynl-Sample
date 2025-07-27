@@ -12,39 +12,6 @@
   </div>
 
   <div class="relative z-10 p-6">
-    <!-- Header VYNL Estilo Minimalista -->
-    <!-- <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-6 shadow-soft">
-      <div class="flex justify-between items-center">
-        <div class="flex items-center space-x-4">
-          <h1 class="text-4xl font-bold text-vynl-black font-mono tracking-wider text-shadow">
-            VYNL
-          </h1>
-          <span class="text-vynl-white text-sm font-medium tracking-wide text-shadow">
-            Samplea lo Underground
-          </span>
-        </div>
-
-        <div class="flex items-center space-x-6">
-          <button
-            (click)="togglePlay()"
-            [class]="isPlaying() ?
-              'bg-vynl-carbon text-vynl-white shadow-crisp' :
-              'bg-white/20 border-white/40 text-vynl-carbon hover:bg-white/30'"
-            class="px-8 py-3 rounded-xl font-bold transition-all duration-100 backdrop-blur-sm border shadow-soft transform active:scale-96">
-            {{ isPlaying() ? 'PARAR' : 'PLAY' }}
-          </button>
-
-          <div class="text-center glass backdrop-blur-sm rounded-xl p-3 border border-white/30">
-            <div class="text-vynl-charcoal text-xs font-medium tracking-wide">BPM</div>
-            <div class="text-2xl font-bold text-vynl-carbon">{{ bpm() }}</div>
-          </div>
-        </div>
-      </div>
-    
-    </div> -->
-
-
-
     <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-4 md:p-6 mb-6 shadow-soft hover:shadow-crisp transition-all duration-300">
   
   <!-- Layout Responsive: Stack en mobile, flex en desktop -->
@@ -203,6 +170,8 @@
       </div>
 
 
+
+
       <!-- 🎵 Columna Derecha: Panel de Controles (1/3 del ancho) -->
       <div class="xl:col-span-1">
         <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-soft h-full">
@@ -354,6 +323,19 @@
 
     </div>
 
+          <!-- 🎹 Toggle Sequencer Button -->
+<div class="sequencer-toggle mt-6 text-center">
+  <button 
+    (click)="toggleSequencer()"
+    class="sequencer-btn px-8 py-3 bg-vynl-carbon text-vynl-white rounded-xl font-bold tracking-wide transition-all duration-300 transform hover:scale-105 hover:shadow-crisp">
+    {{ showSequencer() ? 'HIDE SEQUENCER' : 'SHOW SEQUENCER' }}
+  </button>
+</div>
+
+<!-- 🎵 Sequencer Component -->
+<div *ngIf="showSequencer()" class="sequencer-section mt-6">
+  <app-sequencer></app-sequencer>
+</div>
     <!-- Sección de Controles - Más Compacta -->
     <div class="mt-6 grid grid-cols-2 gap-6">
       <!-- Sección de Descarga -->

@@ -1,0 +1,347 @@
+// src/app/components/sequencer/sequencer.component.scss
+
+.sequencer-container {
+  font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
+  
+  // 🎨 Efectos de vidrio y sombras
+  .glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .shadow-soft {
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  }
+
+  .shadow-crisp {
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
+  }
+}
+
+// 🎚️ Transport Controls
+.transport-header {
+  .play-button {
+    &.playing {
+      animation: pulse 2s infinite;
+    }
+
+    &:hover {
+      transform: scale(1.05);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .bpm-control input {
+    transition: all 0.2s ease;
+    
+    &:focus {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.95);
+    }
+  }
+
+  .step-indicator {
+    .current-step {
+      animation: pulse-step 0.5s ease-in-out;
+    }
+  }
+}
+
+// 🎹 Sequencer Grid
+.sequencer-grid {
+  .grid-header {
+    .step-header {
+      transition: all 0.2s ease;
+      
+      &.current-step {
+        background: theme('colors.vynl.carbon');
+        color: theme('colors.vynl.white');
+        border-radius: 4px;
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(33, 37, 41, 0.4);
+      }
+    }
+  }
+
+  .track-row {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+    
+    &.selected {
+      background: rgba(33, 37, 41, 0.1);
+      border-left: 4px solid theme('colors.vynl.carbon');
+    }
+    
+    &.muted {
+      opacity: 0.5;
+      filter: grayscale(50%);
+    }
+    
+    &.solo {
+      border-left: 4px solid #ffd700;
+      background: rgba(255, 215, 0, 0.1);
+    }
+  }
+
+  .track-info {
+    .pad-indicator {
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    .track-buttons button {
+      transition: all 0.15s ease;
+      
+      &:hover {
+        transform: translateY(-1px);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+}
+
+// 🎵 Step Buttons
+.step-button {
+  position: relative;
+  border: 2px solid transparent;
+  transition: all 0.1s ease;
+  
+  &.step-inactive {
+    background: rgba(173, 181, 189, 0.2) !important;
+    border-color: rgba(173, 181, 189, 0.3);
+    
+    &:hover {
+      background: rgba(173, 181, 189, 0.4) !important;
+      border-color: rgba(173, 181, 189, 0.5);
+      transform: scale(1.05);
+    }
+  }
+  
+  &.step-active {
+    border-color: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    
+    &:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+  }
+  
+  &.current-playback {
+    animation: step-pulse 0.15s ease-in-out;
+    border-color: theme('colors.vynl.white') !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+  }
+  
+  &.step-selected {
+    border-color: theme('colors.vynl.carbon') !important;
+    border-width: 3px;
+    box-shadow: 0 0 12px rgba(33, 37, 41, 0.6);
+  }
+
+  // 🎚️ Visual Indicators
+  .velocity-bar {
+    transition: height 0.2s ease;
+    pointer-events: none;
+  }
+  
+  .pan-indicator {
+    transition: left 0.2s ease;
+    pointer-events: none;
+  }
+  
+  .probability-indicator {
+    animation: blink 1s infinite;
+    pointer-events: none;
+  }
+}
+
+// 🎚️ Sliders and Controls
+.slider {
+  appearance: none;
+  background: theme('colors.vynl.slate');
+  outline: none;
+  transition: all 0.2s ease;
+  
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: theme('colors.vynl.carbon');
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    
+    &:hover {
+      transform: scale(1.2);
+      background: theme('colors.vynl.graphite');
+    }
+  }
+  
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: theme('colors.vynl.carbon');
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+  
+  &:hover {
+    background: theme('colors.vynl.charcoal');
+  }
+  
+  &:focus {
+    background: theme('colors.vynl.charcoal');
+    box-shadow: 0 0 8px rgba(108, 117, 125, 0.5);
+  }
+}
+
+// 🎚️ Advanced Controls
+.advanced-panel {
+  .control-group {
+    label {
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+  }
+
+  .toggle-button {
+    position: relative;
+    cursor: pointer;
+    
+    .toggle-circle {
+      margin-top: 2px;
+    }
+  }
+}
+
+// 🎨 Animations
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes pulse-step {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes step-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+  }
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0.3;
+  }
+}
+
+// 🎚️ Grid Layout Helper
+.grid-cols-16 {
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+}
+
+// 📱 Responsive Design
+@media (max-width: 768px) {
+  .sequencer-container {
+    padding: 1rem;
+    
+    .transport-header {
+      .global-controls {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+    
+    .track-info {
+      width: 120px;
+      
+      .track-name {
+        display: none;
+      }
+    }
+    
+    .step-button {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    
+    .advanced-panel {
+      .controls-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+  }
+}
+
+
+
+@media (max-width: 480px) {
+  .grid-cols-16 {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+  
+  .track-info {
+    width: 80px;
+    padding: 0.5rem;
+  }
+  
+  .step-button {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+
+.grid-cols-16 {
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+}

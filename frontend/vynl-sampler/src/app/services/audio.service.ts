@@ -348,6 +348,83 @@ export class AudioService {
     });
   }
 
+  // Agregar al final de src/app/services/audio.service.ts
+// 🆕 Método para reproducir con efectos avanzados
+async playPadWithEffects(
+  padIndex: number,
+  velocity: number = 1,
+  pan: number = 0,
+  scheduledTime?: number
+): Promise<void> {  // ✅ Agregado Promise<void>
+  const playerData = this.players[padIndex];
+
+  if (!playerData || !playerData.isLoaded) {
+    console.warn(`⚠️ Pad ${padIndex + 1} not loaded`);
+    return;
+  }
+
+  try {
+    // ✅ Validar que buffer no sea null
+    if (!playerData.buffer) {
+      console.warn(`⚠️ Pad ${padIndex + 1} buffer is null`);
+      return;
+    }
+
+    // 🎚️ Crear un nodo de ganancia temporal para este trigger
+    const gainNode = new Tone.Gain(velocity).toDestination();
+    
+    // 🎯 Aplicar paneo
+    const panNode = new Tone.Panner(pan).connect(gainNode);
+    
+    // 🎵 Conectar player a los efectos - ✅ Validar buffer antes de usar
+    const tempPlayer = new Tone.Player(playerData.buffer);
+    tempPlayer.connect(panNode);
+
+    // ⏰ Reproducir en el tiempo especificado o inmediatamente
+    if (scheduledTime) {
+      tempPlayer.start(scheduledTime);
+    } else {
+      tempPlayer.start();
+    }
+
+    // 🗑️ Limpiar después de la reproducción
+    tempPlayer.onstop = () => {
+      tempPlayer.dispose();
+      panNode.dispose();
+      gainNode.dispose();
+    };
+
+    console.log(`🎵 Pad ${padIndex + 1} played with velocity: ${velocity}, pan: ${pan}`);
+
+  } catch (error) {
+    console.error(`❌ Error playing pad ${padIndex + 1} with effects:`, error);
+  }
+}
+
+
+// 🆕 Método para aplicar swing a timing
+private applySwing(baseTime: number, stepIndex: number, swingAmount: number): number {
+  if (swingAmount === 0) return baseTime;
+  
+  // Aplicar swing solo a steps impares (off-beats)
+  if (stepIndex % 2 === 1) {
+    const swingDelay = (swingAmount / 100) * 0.05; // Máximo 50ms de delay
+    return baseTime + swingDelay;
+  }
+  
+  return baseTime;
+}
+
+// 🆕 Método para aplicar humanización
+private applyHumanize(baseTime: number, humanizeAmount: number): number {
+  if (humanizeAmount === 0) return baseTime;
+  
+  const variation = (Math.random() - 0.5) * 2; // -1 to 1
+  const maxDeviation = (humanizeAmount / 100) * 0.02; // Máximo 20ms
+  
+  return baseTime + (variation * maxDeviation);
+}
+
   dispose(): void {
     this.players.forEach((playerData, index) => {
       if (playerData.player) {
@@ -361,4 +438,6 @@ export class AudioService {
 
     console.log('🧹 Audio service disposed');
   }
+
+  
 }

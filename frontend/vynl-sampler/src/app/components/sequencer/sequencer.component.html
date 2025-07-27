@@ -1,0 +1,297 @@
+<!-- src/app/components/sequencer/sequencer.component.html - Correcciones -->
+
+<div class="sequencer-container min-h-screen bg-gradient-to-br from-vynl-cloud to-vynl-silver p-6">
+  
+  <!-- 🎚️ Header: Transport Controls -->
+  <div class="transport-header glass backdrop-blur-xl border border-white/20 rounded-2xl p-4 mb-6 shadow-soft">
+    <div class="flex items-center justify-between">
+      
+      <!-- ▶️ Play/Stop Controls -->
+      <div class="transport-controls flex items-center gap-4">
+        <button 
+          (click)="togglePlayback()"
+          class="play-button w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 transform hover:scale-105"
+          [class.playing]="playbackState().isPlaying"
+          [ngClass]="playbackState().isPlaying ? 
+            'bg-vynl-carbon text-vynl-white shadow-crisp' : 
+            'bg-vynl-white text-vynl-carbon shadow-soft hover:shadow-crisp'">
+          
+          <i class="text-xl" [ngClass]="playbackState().isPlaying ? 'fa fa-stop' : 'fa fa-play'"></i>
+        </button>
+
+        <!-- 🎵 BPM Control -->
+        <div class="bpm-control flex items-center gap-2">
+          <label class="text-vynl-carbon font-bold text-sm">BPM</label>
+          <input 
+            type="number" 
+            min="60" 
+            max="200" 
+            [(ngModel)]="tempBPM"
+            (change)="updateBPM()"
+            class="w-16 h-8 bg-vynl-white/80 border border-vynl-slate rounded-lg text-center text-sm font-mono focus:outline-none focus:ring-2 focus:ring-vynl-carbon">
+          <div class="text-xs text-vynl-charcoal">{{ playbackState().bpm }}</div>
+        </div>
+
+        <!-- 🎲 Current Step Indicator -->
+        <div class="step-indicator flex items-center gap-2">
+          <label class="text-vynl-carbon font-bold text-sm">STEP</label>
+          <div class="w-8 h-8 bg-vynl-carbon text-vynl-white rounded-lg flex items-center justify-center text-sm font-mono">
+            {{ playbackState().currentStep + 1 }}
+          </div>
+        </div>
+      </div>
+
+      <!-- 🎚️ Global Controls -->
+      <div class="global-controls flex items-center gap-6">
+        
+        <!-- 🎵 Swing Control -->
+        <div class="swing-control flex flex-col items-center">
+          <label class="text-xs text-vynl-charcoal font-bold mb-1 tracking-wide">SWING</label>
+          <input 
+            type="range" 
+            min="0" 
+            max="100" 
+            [(ngModel)]="tempSwing"
+            (input)="updateSwing()"
+            class="slider w-16 h-2 bg-vynl-slate rounded-full">
+          <div class="text-xs text-vynl-charcoal mt-1">{{ tempSwing() }}%</div>
+        </div>
+
+        <!-- 🎲 Humanize Control -->
+        <div class="humanize-control flex flex-col items-center">
+          <label class="text-xs text-vynl-charcoal font-bold mb-1 tracking-wide">HUMANIZE</label>
+          <input 
+            type="range" 
+            min="0" 
+            max="100" 
+            [(ngModel)]="tempHumanize"
+            (input)="updateHumanize()"
+            class="slider w-16 h-2 bg-vynl-slate rounded-full">
+          <div class="text-xs text-vynl-charcoal mt-1">{{ tempHumanize() }}%</div>
+        </div>
+
+        <!-- 🎯 View Toggle -->
+        <button 
+          (click)="showAdvancedControls.set(!showAdvancedControls())"
+          class="advanced-toggle px-3 py-1 bg-vynl-white/80 hover:bg-vynl-white text-vynl-carbon rounded-lg text-xs font-bold transition-all duration-200"
+          [class.active]="showAdvancedControls()">
+          {{ showAdvancedControls() ? 'SIMPLE' : 'ADVANCED' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🎹 Main Sequencer Grid -->
+  <div class="sequencer-grid glass backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden shadow-soft">
+    
+    <!-- 📋 Grid Header: Step Numbers -->
+    <div class="grid-header bg-vynl-white/50 border-b border-vynl-slate/30 p-4">
+      <div class="flex">
+        <!-- Track Info Column -->
+        <div class="w-48 flex items-center justify-center">
+          <span class="text-vynl-carbon font-bold text-sm tracking-wide">TRACKS</span>
+        </div>
+        
+        <!-- Step Numbers - ✅ Corregido -->
+        <div class="flex-1 grid grid-cols-16 gap-1">
+          @for (step of getStepNumbers(); track step) {
+            <div class="step-header h-8 flex items-center justify-center text-xs font-mono text-vynl-charcoal font-bold"
+                 [class.current-step]="playbackState().currentStep === step - 1">
+              {{ step }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- 🎵 Track Rows -->
+    <div class="tracks-container max-h-96 overflow-y-auto">
+      @for (track of currentPattern().tracks; track track.id) {
+        <div class="track-row border-b border-vynl-slate/20 hover:bg-vynl-white/30 transition-colors duration-200"
+             [ngClass]="getTrackClass(track)">
+          
+          <div class="flex">
+            <!-- 🎚️ Track Controls -->
+            <div class="track-info w-48 p-3 bg-vynl-white/20 flex items-center justify-between">
+              
+              <!-- Track Name & Pad -->
+              <div class="track-details flex items-center gap-2">
+                <div class="pad-indicator w-6 h-6 rounded flex items-center justify-center text-xs font-bold text-vynl-white"
+                     [style.background-color]="track.color">
+                  {{ track.padIndex + 1 }}
+                </div>
+                <div class="track-name text-sm font-bold text-vynl-carbon truncate">
+                  {{ track.name }}
+                </div>
+              </div>
+
+              <!-- Track Buttons -->
+              <div class="track-buttons flex items-center gap-1">
+                <button 
+                  (click)="onMuteToggle(track.id)"
+                  class="w-6 h-6 rounded text-xs font-bold transition-all duration-200"
+                  [ngClass]="track.mute ? 
+                    'bg-vynl-carbon text-vynl-white' : 
+                    'bg-vynl-slate/50 text-vynl-charcoal hover:bg-vynl-charcoal hover:text-vynl-white'">
+                  M
+                </button>
+                <button 
+                  (click)="onSoloToggle(track.id)"
+                  class="w-6 h-6 rounded text-xs font-bold transition-all duration-200"
+                  [ngClass]="track.solo ? 
+                    'bg-vynl-carbon text-vynl-white' : 
+                    'bg-vynl-slate/50 text-vynl-charcoal hover:bg-vynl-charcoal hover:text-vynl-white'">
+                  S
+                </button>
+              </div>
+            </div>
+
+            <!-- 🎵 Step Grid - ✅ Corregido -->
+            <div class="steps-grid flex-1 p-3 grid grid-cols-16 gap-1">
+              @for (step of track.steps; track $index) {
+                <button 
+                  class="step-button relative w-8 h-8 rounded transition-all duration-150 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-vynl-carbon/50"
+                  [ngClass]="{
+                    'step-active': step.isActive,
+                    'step-inactive': !step.isActive,
+                    'current-playback': playbackState().currentStep === $index && playbackState().isPlaying,
+                    'step-selected': selectedStep() === $index && selectedTrack() === track.id
+                  }"
+                  [style.background-color]="step.isActive ? track.color : 'transparent'"
+                  [style.opacity]="step.isActive ? (step.velocity / 127) : 0.3"
+                  (click)="onStepClick(track.id, $index, $event)"
+                  (wheel)="onStepWheel(track.id, $index, $event)">
+                  
+                  <!-- 🎚️ Velocity Visual -->
+                  <div *ngIf="step.isActive && showAdvancedControls()" 
+                       class="velocity-bar absolute bottom-0 left-0 w-full bg-vynl-white/40 rounded-b"
+                       [style.height.%]="(step.velocity / 127) * 100">
+                  </div>
+
+                  <!-- 🎯 Pan Indicator -->
+                  <div *ngIf="step.isActive && step.pan !== 0 && showAdvancedControls()" 
+                       class="pan-indicator absolute top-0 w-1 h-1 rounded-full bg-vynl-white"
+                       [style.left.%]="((step.pan + 1) / 2) * 100">
+                  </div>
+
+                  <!-- 🎲 Probability Indicator -->
+                  <div *ngIf="step.isActive && step.probability < 100 && showAdvancedControls()" 
+                       class="probability-indicator absolute top-0 right-0 w-1 h-1 rounded-full bg-yellow-400">
+                  </div>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- 🎚️ Advanced Controls Panel - ✅ Corregido -->
+  <div *ngIf="showAdvancedControls() && selectedTrackData() && selectedStepData()" 
+       class="advanced-panel glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 mt-6 shadow-soft">
+    
+    <h3 class="text-vynl-carbon text-lg font-bold mb-4 tracking-wide">
+      ADVANCED CONTROLS - {{ selectedTrackData()!.name }} Step {{ selectedStep()! + 1 }}
+    </h3>
+
+    <div class="controls-grid grid grid-cols-2 md:grid-cols-4 gap-6">
+      
+      <!-- 🎚️ Velocity -->
+      <div class="control-group">
+        <label class="block text-sm font-bold text-vynl-carbon mb-2">VELOCITY</label>
+        <input 
+          type="range" 
+          min="0" 
+          max="127" 
+          [value]="selectedStepData()!.velocity"
+          (input)="sequencerService.updateStepVelocity(selectedTrackData()!.id, selectedStep()!, +$any($event.target).value)"
+          class="slider w-full h-2 bg-vynl-slate rounded-full">
+        <div class="text-xs text-vynl-charcoal mt-1 text-center">{{ selectedStepData()!.velocity }}/127</div>
+      </div>
+
+      <!-- 🎯 Pan -->
+      <div class="control-group">
+        <label class="block text-sm font-bold text-vynl-carbon mb-2">PAN</label>
+        <input 
+          type="range" 
+          min="-100" 
+          max="100" 
+          [value]="selectedStepData()!.pan * 100"
+          (input)="sequencerService.updateStepPan(selectedTrackData()!.id, selectedStep()!, +$any($event.target).value / 100)"
+          class="slider w-full h-2 bg-vynl-slate rounded-full">
+        <div class="text-xs text-vynl-charcoal mt-1 text-center">
+          {{ selectedStepData()!.pan > 0 ? 'R' : selectedStepData()!.pan < 0 ? 'L' : 'C' }}{{ Math.abs(selectedStepData()!.pan * 100).toFixed(0) }}
+        </div>
+      </div>
+
+      <!-- 🎲 Probability -->
+      <div class="control-group">
+        <label class="block text-sm font-bold text-vynl-carbon mb-2">CHANCE</label>
+        <input 
+          type="range" 
+          min="0" 
+          max="100" 
+          [value]="selectedStepData()!.probability"
+          class="slider w-full h-2 bg-vynl-slate rounded-full">
+        <div class="text-xs text-vynl-charcoal mt-1 text-center">{{ selectedStepData()!.probability }}%</div>
+      </div>
+
+      <!-- ⏱️ Note Length -->
+      <div class="control-group">
+        <label class="block text-sm font-bold text-vynl-carbon mb-2">LENGTH</label>
+        <input 
+          type="range" 
+          min="10" 
+          max="400" 
+          [value]="selectedStepData()!.noteLength * 100"
+          class="slider w-full h-2 bg-vynl-slate rounded-full">
+        <div class="text-xs text-vynl-charcoal mt-1 text-center">{{ (selectedStepData()!.noteLength * 100).toFixed(0) }}%</div>
+      </div>
+    </div>
+
+    <!-- 🎵 Advanced Options Row -->
+    <div class="advanced-options mt-6 flex items-center gap-6">
+      
+      <!-- 🎼 Triplet Toggle -->
+      <div class="triplet-control">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input 
+            type="checkbox" 
+            [checked]="selectedStepData()!.triplet"
+            class="sr-only">
+          <div class="toggle-button w-12 h-6 rounded-full transition-all duration-200"
+               [ngClass]="selectedStepData()!.triplet ? 'bg-vynl-carbon' : 'bg-vynl-slate'">
+            <div class="toggle-circle w-5 h-5 bg-vynl-white rounded-full transition-transform duration-200 transform"
+                 [ngClass]="selectedStepData()!.triplet ? 'translate-x-6' : 'translate-x-0.5'"></div>
+          </div>
+          <span class="text-sm font-bold text-vynl-carbon">TRIPLET</span>
+        </label>
+      </div>
+
+      <!-- 🎚️ Step Humanize -->
+      <div class="humanize-control flex items-center gap-3">
+        <label class="text-sm font-bold text-vynl-carbon">HUMANIZE</label>
+        <input 
+          type="range" 
+          min="0" 
+          max="100" 
+          [value]="selectedStepData()!.humanize"
+          class="slider w-24 h-2 bg-vynl-slate rounded-full">
+        <span class="text-xs text-vynl-charcoal w-8">{{ selectedStepData()!.humanize }}%</span>
+      </div>
+
+      <!-- 🎵 Step Swing -->
+      <div class="swing-control flex items-center gap-3">
+        <label class="text-sm font-bold text-vynl-carbon">SWING</label>
+        <input 
+          type="range" 
+          min="0" 
+          max="100" 
+          [value]="selectedStepData()!.swing"
+          class="slider w-24 h-2 bg-vynl-slate rounded-full">
+        <span class="text-xs text-vynl-charcoal w-8">{{ selectedStepData()!.swing }}%</span>
+      </div>
+    </div>
+  </div>
+</div>
