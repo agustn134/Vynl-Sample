@@ -246,6 +246,71 @@ stopAllPads(): void {
     console.log(`🎛️ ${effectType} added to pad ${padIndex + 1}`);
   }
 
+
+  // Agregar al final de audio.service.ts (antes del dispose)
+
+setPadVolume(padIndex: number, volume: number): void {
+  const playerData = this.players[padIndex];
+  if (playerData && playerData.player) {
+    playerData.player.volume.value = Tone.gainToDb(volume);
+  }
+}
+
+setPadPitch(padIndex: number, pitch: number): void {
+  const playerData = this.players[padIndex];
+  if (playerData && playerData.player) {
+    playerData.player.playbackRate = Math.pow(2, pitch / 12);
+  }
+}
+
+removeEffectFromPad(padIndex: number, effectType: string): void {
+  const playerData = this.players[padIndex];
+  if (!playerData) return;
+
+  // Desconectar y recrear player limpio
+  playerData.player.disconnect();
+  playerData.player.toDestination();
+
+  console.log(`🎛️ ${effectType} removed from pad ${padIndex + 1}`);
+}
+
+duplicatePad(sourcePadIndex: number, targetPadIndex: number): void {
+  const sourcePlayer = this.players[sourcePadIndex];
+  const targetPlayer = this.players[targetPadIndex];
+
+  if (!sourcePlayer.isLoaded || !sourcePlayer.player.loaded) {
+    console.log(`⚠️ Pad ${sourcePadIndex + 1} has no sample to duplicate`);
+    return;
+  }
+
+  try {
+    // Crear nuevo player
+    const newPlayer = new Tone.Player().toDestination();
+
+    // Copiar el buffer directamente
+    newPlayer.buffer = sourcePlayer.player.buffer;
+
+    // Reemplazar el player del pad destino
+    targetPlayer.player.dispose();
+    targetPlayer.player = newPlayer;
+    targetPlayer.isLoaded = true;
+    targetPlayer.buffer = sourcePlayer.buffer;
+
+    console.log(`📋 Pad ${sourcePadIndex + 1} duplicated to ${targetPadIndex + 1}`);
+
+  } catch (error) {
+    console.error(`Error duplicating pad ${sourcePadIndex + 1}:`, error);
+
+    // Fallback: mostrar mensaje informativo
+    console.log(`🚧 Duplication not available. Please load the same file manually.`);
+  }
+}
+
+getPadBuffer(padIndex: number): Tone.ToneAudioBuffer | null {
+  const playerData = this.players[padIndex];
+  return playerData?.player?.buffer || null;
+}
+
   dispose(): void {
     // Limpiar todos los resources
     this.players.forEach((playerData, index) => {

@@ -42,45 +42,184 @@
       </div>
     </div>
 
-    <!-- Grid de Pads - Glass Minimalista -->
-    <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-soft">
-      <h2 class="text-vynl-silver text-xl font-bold mb-6 tracking-wide text-shadow">PADS DEL SAMPLER</h2>
+    <!-- 🆕 NUEVO: Layout Principal con 2 Columnas -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-      <div class="grid grid-cols-4 gap-3 max-w-2xl">
-        @for (pad of pads(); track pad.id) {
-          <div class="relative group">
-            <button
-              (mousedown)="playPad(pad.id)"
-              (touchstart)="playPad(pad.id)"
-              class="w-full h-20 bg-white/10 backdrop-blur-sm border border-white/30 rounded-lg
-                     hover:bg-white/20 active:bg-vynl-charcoal/10
-                     transition-all duration-80 transform active:scale-96
-                     shadow-soft hover:shadow-crisp relative overflow-hidden group">
-              <!-- LED Indicator minimalista -->
-              <div class="absolute top-2 right-2 w-2 h-2 rounded-full border border-white/50"
-                   [class]="pad.isActive ?
-                     'bg-vynl-carbon shadow-crisp animate-pulse-fast' :
-                     'bg-vynl-slate/60'">
+      <!-- 🎛️ Columna Izquierda: Pads del Sampler (2/3 del ancho) -->
+      <div class="xl:col-span-2">
+        <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-soft">
+          <h2 class="text-vynl-silver text-xl font-bold mb-6 tracking-wide text-shadow">PADS DEL SAMPLER</h2>
+
+          <div class="grid grid-cols-4 gap-3">
+            @for (pad of pads(); track pad.id) {
+              <div class="relative group">
+                <button
+                  (mousedown)="playPad(pad.id)"
+                  (touchstart)="playPad(pad.id)"
+                  (click)="selectPad(pad.id)"
+                  class="w-full h-20 bg-white/10 backdrop-blur-sm border border-white/30 rounded-lg
+                         hover:bg-white/20 active:bg-vynl-charcoal/10
+                         transition-all duration-80 transform active:scale-96
+                         shadow-soft hover:shadow-crisp relative overflow-hidden group">
+
+                  <!-- LED Indicator minimalista -->
+                  <div class="absolute top-2 right-2 w-2 h-2 rounded-full border border-white/50"
+                       [class]="pad.isActive ?
+                         'bg-vynl-carbon shadow-crisp animate-pulse-fast' :
+                         'bg-vynl-slate/60'">
+                  </div>
+
+                  <!-- Número del Pad -->
+                  <div class="absolute top-2 left-2 text-xs font-mono text-vynl-charcoal font-medium">
+                    {{ pad.id + 1 }}
+                  </div>
+
+                  <!-- 🆕 Indicador de Pad Seleccionado -->
+                  <div *ngIf="selectedPad() === pad.id"
+                       class="absolute inset-0 border-2 border-vynl-purple rounded-lg pointer-events-none">
+                  </div>
+
+                  <!-- Nombre del Sample -->
+                  <div class="flex items-end justify-center h-full pb-2">
+                    <div class="text-xs font-medium text-vynl-carbon/90 truncate px-2 text-center">
+                      {{ pad.sampleName }}
+                    </div>
+                  </div>
+                </button>
               </div>
+            }
+          </div>
+        </div>
+      </div>
 
-              <!-- Número del Pad -->
-              <div class="absolute top-2 left-2 text-xs font-mono text-vynl-charcoal font-medium">
-                {{ pad.id + 1 }}
+
+      <!-- 🎵 Columna Derecha: Panel de Controles (1/3 del ancho) -->
+      <div class="xl:col-span-1">
+        <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-soft h-full">
+          <h3 class="text-vynl-carbon text-lg font-bold mb-4 tracking-wide text-shadow">
+            CONTROLES {{ selectedPad() !== null ? 'PAD ' + (selectedPad()! + 1) : 'MASTER' }}
+          </h3>
+
+          <!-- 🆕 Waveform Principal -->
+          <div class="mb-6">
+            <div class="bg-vynl-black/30 rounded-lg p-4 border border-vynl-slate/30">
+              <div class="text-center text-vynl-charcoal text-sm font-medium">
+                {{ selectedPad() !== null ? 'Waveform del Pad ' + (selectedPad()! + 1) : 'Selecciona un pad' }}
               </div>
+               <canvas #waveformCanvas
+            width="280"
+            height="80"
+            class="w-full h-20 rounded bg-vynl-cloud/10">
+    </canvas>
+            </div>
+          </div>
 
-              <!-- Nombre del Sample -->
-              <div class="flex items-end justify-center h-full pb-2">
-                <div class="text-xs font-medium text-vynl-carbon/90 truncate px-2 text-center">
-                  {{ pad.sampleName }}
+          <!-- 🆕 Controles de Audio -->
+          <div class="space-y-6" *ngIf="selectedPad() !== null">
+
+            <!-- Control de Volumen -->
+            <div>
+              <label class="block text-sm font-bold text-vynl-carbon mb-3 tracking-wide">VOLUMEN</label>
+              <div class="flex items-center space-x-3">
+                <span class="text-xs text-vynl-charcoal font-medium">0</span>
+                <input type="range"
+                       [value]="currentPadVolume()"
+                       (input)="setPadVolume($event)"
+                       min="0" max="100" step="1"
+                       class="flex-1 h-3 bg-vynl-slate/20 rounded-lg appearance-none cursor-pointer
+                              slider-thumb:bg-vynl-carbon slider-thumb:rounded-full
+                              hover:bg-vynl-slate/30 transition-all duration-100">
+                <span class="text-xs text-vynl-charcoal font-medium">100</span>
+                <div class="text-sm font-bold text-vynl-carbon min-w-[3rem]
+                           bg-vynl-cloud/80 px-2 py-1 rounded border border-vynl-steel">
+                  {{ currentPadVolume() }}%
                 </div>
               </div>
-            </button>
+            </div>
+
+            <!-- Control de Pitch -->
+            <div>
+              <label class="block text-sm font-bold text-vynl-carbon mb-3 tracking-wide">PITCH</label>
+              <div class="flex items-center space-x-3">
+                <span class="text-xs text-vynl-charcoal font-medium">-12</span>
+                <input type="range"
+                       [value]="currentPadPitch()"
+                       (input)="setPadPitch($event)"
+                       min="-12" max="12" step="0.1"
+                       class="flex-1 h-3 bg-vynl-slate/20 rounded-lg appearance-none cursor-pointer
+                              slider-thumb:bg-vynl-carbon slider-thumb:rounded-full
+                              hover:bg-vynl-slate/30 transition-all duration-100">
+                <span class="text-xs text-vynl-charcoal font-medium">+12</span>
+                <div class="text-sm font-bold text-vynl-carbon min-w-[3rem]
+                           bg-vynl-cloud/80 px-2 py-1 rounded border border-vynl-steel">
+                  {{ currentPadPitch() > 0 ? '+' : '' }}{{ currentPadPitch() }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Efectos -->
+            <div>
+              <label class="block text-sm font-bold text-vynl-carbon mb-3 tracking-wide">EFECTOS</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button (click)="toggleEffect('reverb')"
+                        [class]="hasEffect('reverb') ?
+                          'bg-vynl-carbon text-vynl-white shadow-lg' :
+                          'bg-vynl-silver/60 text-vynl-carbon hover:bg-vynl-steel/60'"
+                        class="px-3 py-3 rounded-lg text-xs font-bold transition-all duration-100
+                               border border-vynl-slate/30 transform active:scale-95 shadow-soft">
+                  REVERB
+                </button>
+                <button (click)="toggleEffect('delay')"
+                        [class]="hasEffect('delay') ?
+                          'bg-vynl-carbon text-vynl-white shadow-lg' :
+                          'bg-vynl-silver/60 text-vynl-carbon hover:bg-vynl-steel/60'"
+                        class="px-3 py-3 rounded-lg text-xs font-bold transition-all duration-100
+                               border border-vynl-slate/30 transform active:scale-95 shadow-soft">
+                  DELAY
+                </button>
+                <button (click)="toggleEffect('filter')"
+                        [class]="hasEffect('filter') ?
+                          'bg-vynl-carbon text-vynl-white shadow-lg' :
+                          'bg-vynl-silver/60 text-vynl-carbon hover:bg-vynl-steel/60'"
+                        class="px-3 py-3 rounded-lg text-xs font-bold transition-all duration-100
+                               border border-vynl-slate/30 transform active:scale-95 shadow-soft">
+                  FILTER
+                </button>
+              </div>
+            </div>
+
+            <!--  Acciones del Pad -->
+            <div class="pt-4 border-t border-vynl-slate/30">
+              <div class="grid grid-cols-2 gap-3">
+                <button (click)="clearSelectedPad()"
+                        class="bg-vynl-iron/40 text-vynl-white px-4 py-3 rounded-lg text-xs font-bold
+                               hover:bg-vynl-iron/60 transition-all duration-100
+                               border border-vynl-graphite/30 transform active:scale-95 shadow-soft">
+                  LIMPIAR
+                </button>
+                <button (click)="duplicatePad()"
+                        class="bg-vynl-steel/40 text-vynl-carbon px-4 py-3 rounded-lg text-xs font-bold
+                               hover:bg-vynl-steel/60 transition-all duration-100
+                               border border-vynl-slate/40 transform active:scale-95 shadow-soft">
+                  DUPLICAR
+                </button>
+              </div>
+            </div>
+
           </div>
-        }
+
+          <!-- Mensaje cuando no hay pad seleccionado -->
+          <div *ngIf="selectedPad() === null" class="text-center text-vynl-charcoal text-sm mt-8
+                                                    bg-vynl-cloud/20 p-6 rounded-lg border border-vynl-steel/30">
+            <div class="text-vynl-carbon font-medium mb-2">PANEL DE CONTROLES</div>
+            <div class="text-xs">Haz clic en un pad para ver sus controles</div>
+          </div>
+        </div>
       </div>
+
     </div>
 
-    <!-- Sección de Controles - Glass Cards Minimalistas -->
+    <!-- Sección de Controles - Más Compacta -->
     <div class="mt-6 grid grid-cols-2 gap-6">
       <!-- Sección de Descarga -->
       <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-soft">
@@ -112,7 +251,7 @@
             type="file"
             multiple
             accept="audio/*"
-              (change)="onFileSelected($event)"
+            (change)="onFileSelected($event)"
             class="w-full p-4 bg-white/60 backdrop-blur-sm border border-white/40 rounded-xl
                    text-vynl-carbon file:mr-4 file:py-2 file:px-4 file:rounded-lg
                    file:border-0 file:bg-vynl-carbon file:text-vynl-white file:font-medium
