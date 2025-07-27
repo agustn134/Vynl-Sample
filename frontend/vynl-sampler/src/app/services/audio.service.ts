@@ -15,7 +15,7 @@ interface SampleData {
 })
 export class AudioService {
   private players: SampleData[] = [];
-  private isInitialized = false;
+  public isInitialized = false;
   private sequence: Tone.Sequence | null = null;
   private currentStep = 0;
 

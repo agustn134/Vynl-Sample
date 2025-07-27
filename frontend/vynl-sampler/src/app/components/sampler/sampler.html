@@ -13,7 +13,7 @@
 
   <div class="relative z-10 p-6">
     <!-- Header VYNL Estilo Minimalista -->
-    <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-6 shadow-soft">
+    <!-- <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-6 shadow-soft">
       <div class="flex justify-between items-center">
         <div class="flex items-center space-x-4">
           <h1 class="text-4xl font-bold text-vynl-black font-mono tracking-wider text-shadow">
@@ -40,7 +40,116 @@
           </div>
         </div>
       </div>
+    
+    </div> -->
+
+
+
+    <div class="glass backdrop-blur-xl border border-white/20 rounded-2xl p-4 md:p-6 mb-6 shadow-soft hover:shadow-crisp transition-all duration-300">
+  
+  <!-- Layout Responsive: Stack en mobile, flex en desktop -->
+  <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+    
+    <!-- 🎵 Sección del Logo y Tagline -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+      
+      <!-- Logo Principal -->
+      <div class="flex flex-col items-start">
+        <h1 class="text-3xl sm:text-4xl xl:text-5xl font-bold text-vynl-black font-mono tracking-wider text-shadow leading-none">
+          VYNL
+        </h1>
+        <!-- Tagline responsivo: abajo en mobile, al lado en desktop -->
+        <span class="text-vynl-white text-xs sm:text-sm font-medium tracking-wide text-shadow mt-1 sm:mt-0 
+                     opacity-90 lg:hidden">
+          Samplea lo Underground
+        </span>
+      </div>
+      
+      <!-- Tagline para desktop (hidden en mobile) -->
+      <span class="hidden lg:block text-vynl-white text-sm xl:text-base font-medium tracking-wide text-shadow
+                   opacity-90 border-l border-vynl-slate/40 pl-4">
+        Samplea lo Underground
+      </span>
+      
     </div>
+
+    <!-- 🎚️ Controles de Transporte -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 lg:gap-6">
+      
+      <!-- Control de BPM (arriba en mobile) -->
+      <div class="order-2 sm:order-1">
+        <div class="glass backdrop-blur-sm rounded-xl p-3 border border-white/30 text-center
+                    hover:border-white/50 transition-all duration-200 group">
+          <div class="text-vynl-charcoal text-xs font-medium tracking-wide mb-1 
+                      group-hover:text-vynl-graphite transition-colors">BPM</div>
+          <div class="text-xl sm:text-2xl font-bold text-vynl-carbon group-hover:text-vynl-black transition-colors">
+            {{ bpm() }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón Play/Stop Principal -->
+      <div class="order-1 sm:order-2">
+        <button
+          (click)="togglePlay()"
+          [class]="isPlaying() ?
+            'bg-vynl-carbon text-vynl-white shadow-crisp border-vynl-carbon hover:bg-vynl-iron' :
+            'bg-white/20 border-white/40 text-vynl-carbon hover:bg-white/30 hover:border-white/60'"
+          class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3 rounded-xl font-bold 
+                 transition-all duration-200 backdrop-blur-sm border shadow-soft 
+                 transform active:scale-96 hover:scale-105 text-sm sm:text-base
+                 flex items-center justify-center gap-2 group">
+          
+          <!-- Icono de Play/Pause -->
+          <span class="text-lg" [innerHTML]="isPlaying() ? '⏸' : '▶'"></span>
+          <span class="tracking-wide">{{ isPlaying() ? 'PARAR' : 'PLAY' }}</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 🎵 Información Adicional (Solo Desktop) -->
+  <div class="hidden xl:flex items-center justify-between mt-4 pt-4 border-t border-white/20">
+    
+    <!-- Info del Estado -->
+    <div class="flex items-center gap-6 text-xs text-vynl-slate/80">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse" 
+             *ngIf="audioService.isInitialized"></div>
+        <span>Audio Engine Ready</span>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <span>{{ loadedPadsCount() }}/16 Pads Loaded</span>
+      </div>
+      
+      <div class="flex items-center gap-2" *ngIf="selectedPad() !== null">
+        <span>Pad {{ selectedPad()! + 1 }} Selected</span>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex items-center gap-2">
+      <button class="px-3 py-1 text-xs bg-vynl-slate/20 hover:bg-vynl-slate/30 
+                     rounded-lg transition-colors border border-vynl-slate/30"
+              title="Panic - Stop All">
+        ESC
+      </button>
+      <button class="px-3 py-1 text-xs bg-vynl-slate/20 hover:bg-vynl-slate/30 
+                     rounded-lg transition-colors border border-vynl-slate/30"
+              title="Play/Pause">
+        SPACE
+      </button>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
 
     <!-- 🆕 NUEVO: Layout Principal con 2 Columnas -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">

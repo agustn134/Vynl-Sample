@@ -42,7 +42,7 @@ export class SamplerComponent implements OnInit, OnDestroy {
   padControls = signal<PadControls[]>([]);
 
   constructor(
-    private audioService: AudioService,
+    public audioService: AudioService,
     private inputService: InputService,
     private waveformService: WaveformService
   ) {
@@ -216,6 +216,16 @@ updateWaveform(): void {
       console.log(`📭 Pad ${selected + 1} is empty - showing placeholder`);
     }
   }
+}
+
+
+loadedPadsCount(): number {
+  return this.pads().filter(pad => pad.isLoaded).length;
+}
+
+// Método para mostrar el estado del audio engine
+get audioEngineStatus(): string {
+  return this.audioService['isInitialized'] ? 'ready' : 'loading';
 }
 
 // 🆕 Método para manejar la interacción desde teclado/MIDI
