@@ -1,34 +1,38 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./src/**/*.{html,ts}",
-  ],
+  content: ["./src/**/*.{html,ts}"],
   theme: {
     extend: {
       colors: {
         'vynl': {
+          // Escala de grises minimalista
+          'white': '#ffffff',
+          'cloud': '#f8f9fa',
+          'silver': '#e9ecef',
+          'steel': '#dee2e6',
+          'slate': '#adb5bd',
+          'charcoal': '#6c757d',
+          'graphite': '#495057',
+          'iron': '#343a40',
+          'carbon': '#212529',
           'black': '#000000',
-          'dark': '#1a1a1a',
-          'purple': '#9d4edd',
-          'purple-dark': '#5a189a',
-          'gray': '#333333',
-          'gray-light': '#666666'
         }
       },
-      gridTemplateColumns: {
-        '16': 'repeat(16, minmax(0, 1fr))',
-        '4': 'repeat(4, minmax(0, 1fr))',
-      },
       animation: {
-        'pulse-fast': 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'pad-hit': 'padHit 0.15s ease-out',
+        'pulse-fast': 'pulse 0.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pad-hit': 'padHit 0.08s ease-out',
+        // 'shimmer': 'shimmer 1s linear infinite',
       },
       keyframes: {
         padHit: {
-          '0%': { transform: 'scale(1)', boxShadow: '0 0 0 rgba(157, 74, 237, 0)' },
-          '50%': { transform: 'scale(0.95)', boxShadow: '0 0 20px rgba(157, 74, 237, 0.6)' },
-          '100%': { transform: 'scale(1)', boxShadow: '0 0 0 rgba(157, 74, 237, 0)' }
-        }
+          '0%': { transform: 'scale(1)', boxShadow: '0 0 0 rgba(0, 0, 0, 0)' },
+          '50%': { transform: 'scale(0.96)', boxShadow: '0 0 15px rgba(0, 0, 0, 0.4)' },
+          '100%': { transform: 'scale(1)', boxShadow: '0 0 0 rgba(0, 0, 0, 0)' }
+        },
+        // shimmer: {
+        //   '0%': { transform: 'translateX(-100%)' },
+        //   '100%': { transform: 'translateX(100%)' }
+        // }
       }
     },
   },
